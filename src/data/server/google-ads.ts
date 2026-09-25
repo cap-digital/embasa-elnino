@@ -1,6 +1,6 @@
 import "server-only";
 import { JWT } from "google-auth-library";
-import type { Creative, DailyRow, LineExtras } from "../types";
+import type { Creative, DailyRow, Keyword, LineExtras } from "../types";
 import { ACCOUNT_TZ_OFFSET, requireEnv, todayInBahia } from "./env";
 
 /**
@@ -40,6 +40,7 @@ interface GoogleAdsRow {
   };
   segments?: { date?: string };
   metrics?: Record<string, string | number | undefined>;
+  campaignBudget?: { amountMicros?: string };
 }
 
 async function search(query: string): Promise<GoogleAdsRow[]> {
@@ -84,6 +85,8 @@ export interface GoogleCampaignData {
   status: string;
   channel: string;
   flight: { start: string; end: string } | null;
+  /** Orçamento diário BRUTO da plataforma (R$). */
+  dailyBudget: number | null;
   /** Série diária, com a métrica contratada ainda por decidir (ver `delivered`). */
   days: Array<{
     date: string;
@@ -100,7 +103,7 @@ export interface GoogleCampaignData {
 }
 
 const CAMPAIGN_FIELDS =
-  "campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.start_date_time, campaign.end_date_time";
+  "campaign.id, campaign.name, campaign.status, campaign.advertising_channel_type, campaign.start_date_time, campaign.end_date_time, campaign_budget.amount_micros";
 
 /** Busca metadados, série diária e alcance de um conjunto de campanhas. */
 export async function fetchGoogleCampaigns(options: {
@@ -132,6 +135,7 @@ export async function fetchGoogleCampaigns(options: {
       status: c.status ?? "",
       channel: c.advertisingChannelType ?? "",
       flight: start && end ? { start, end } : null,
+      dailyBudget: row.campaignBudget?.amountMicros ? num(row.campaignBudget.amountMicros) / 1_000_000 : null,
       days: [],
       extras: {},
     };
@@ -307,4 +311,67 @@ export async function fetchGoogleCreatives(options: {
     list.sort((a, b) => b.impressions - a.impressions);
   }
   return byCampaign;
+}
+
+/**
+ * Palavras-chave de campanhas de pesquisa, com métricas somadas no período.
+ * Vêm todas (inclusive sem entrega); custo BRUTO (margem em sources.ts).
+ */
+export async function fetchGoogleKeywords(options: {
+  campaignIds: string[];
+  from: string;
+}): Promise<Record<string, Keyword[]>> {
+  if (options.campaignIds.length === 0) {
+    return {};
+  }
+  const today = todayInBahia();
+  const rows = (await search(
+    `SELECT campaign.id, ad_group.name, ad_group_criterion.criterion_id, ad_group_criterion.keyword.text, ad_group_criterion.keyword.match_type, ad_group_criterion.status, ad_group_criterion.quality_info.quality_score, metrics.impressions, metrics.clicks, metrics.cost_micros FROM keyword_view WHERE campaign.id IN (${options.campaignIds.join(", ")}) AND ad_group_criterion.status != 'REMOVED' AND segments.date BETWEEN '${options.from}' AND '${today}'`
+  )) as Array<{
+    campaign?: { id?: string };
+    adGroup?: { name?: string };
+    adGroupCriterion?: {
+      criterionId?: string;
+      status?: string;
+      keyword?: { text?: string; matchType?: string };
+      qualityInfo?: { qualityScore?: number };
+    };
+    metrics?: Record<string, string | number | undefined>;
+  }>;
+
+  // O searchStream com segments.date no WHERE agrega por critério; ainda assim
+  // somamos por ID para o caso de vir mais de uma linha do mesmo critério.
+  const byCampaign: Record<string, Map<string, Keyword>> = {};
+  for (const row of rows) {
+    const campaignId = row.campaign?.id;
+    const c = row.adGroupCriterion;
+    if (!campaignId || !c?.criterionId || !c.keyword?.text) {
+      continue;
+    }
+    const map = (byCampaign[campaignId] ??= new Map());
+    const key = `${row.adGroup?.name ?? ""}::${c.criterionId}`;
+    const current = map.get(key) ?? {
+      id: c.criterionId,
+      text: c.keyword.text,
+      matchType: c.keyword.matchType ?? "",
+      adGroup: row.adGroup?.name ?? "",
+      status: c.status ?? "",
+      qualityScore: c.qualityInfo?.qualityScore,
+      impressions: 0,
+      clicks: 0,
+      spend: 0,
+    };
+    current.impressions += num(row.metrics?.impressions);
+    current.clicks += num(row.metrics?.clicks);
+    current.spend += num(row.metrics?.costMicros) / 1_000_000;
+    map.set(key, current);
+  }
+
+  const result: Record<string, Keyword[]> = {};
+  for (const [campaignId, map] of Object.entries(byCampaign)) {
+    result[campaignId] = [...map.values()].sort(
+      (a, b) => b.clicks - a.clicks || b.impressions - a.impressions || a.text.localeCompare(b.text, "pt-BR")
+    );
+  }
+  return result;
 }

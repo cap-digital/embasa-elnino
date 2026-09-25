@@ -178,6 +178,21 @@ export interface Creative {
   quartiles?: { q25: number; q50: number; q75: number; q100: number };
 }
 
+/** Palavra-chave de pesquisa com métricas do período inteiro. JSON puro. */
+export interface Keyword {
+  id: string;
+  text: string;
+  matchType: "BROAD" | "PHRASE" | "EXACT" | string;
+  adGroup: string;
+  status: string;
+  /** Índice de qualidade (1–10); ausente até o Google calcular. */
+  qualityScore?: number;
+  impressions: number;
+  clicks: number;
+  /** Investimento (já convertido pela margem da plataforma). */
+  spend: number;
+}
+
 /** Métricas extras que só existem para o período inteiro (sem série diária). */
 export interface LineExtras {
   reach?: number;
@@ -197,6 +212,10 @@ export interface LineDataset {
   extras?: LineExtras;
   /** Criativos com entrega no período (quando a plataforma informa). */
   creatives?: Creative[];
+  /** Palavras-chave (campanhas de pesquisa), mesmo antes da primeira entrega. */
+  keywords?: Keyword[];
+  /** Orçamento diário da campanha na plataforma (convertido pela margem). */
+  dailyBudget?: number;
   /** Nome da campanha na plataforma. */
   externalName?: string;
   /** Quando os dados foram buscados na API (ISO). */
@@ -240,6 +259,8 @@ export interface LineSummary {
   /** Null quando a linha não tem dados. */
   complementary: ComplementaryMetrics | null;
   creatives: Creative[];
+  keywords: Keyword[];
+  dailyBudget: number | null;
   daily: DailyRow[];
 }
 

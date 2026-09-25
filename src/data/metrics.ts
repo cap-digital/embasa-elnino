@@ -241,6 +241,9 @@ export function getLineSummary(lineId: LineId, datasets: Datasets): LineSummary 
       ? complementaryFor(line, rows, spentRaw, dataset.extras)
       : null,
     creatives: hasData ? (dataset.creatives ?? []) : [],
+    // Palavras-chave aparecem mesmo antes da primeira entrega.
+    keywords: dataset.keywords ?? [],
+    dailyBudget: dataset.dailyBudget ?? null,
     daily: rows,
   };
 }

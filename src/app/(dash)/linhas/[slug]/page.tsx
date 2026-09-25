@@ -1,5 +1,15 @@
 import type { Metadata } from "next";
-import { CalendarRange, Gauge, Target, Wallet } from "lucide-react";
+import {
+  CalendarRange,
+  Coins,
+  Gauge,
+  KeyRound,
+  MousePointerClick,
+  Percent,
+  Radio,
+  Target,
+  Wallet,
+} from "lucide-react";
 import { notFound } from "next/navigation";
 import { KpiCard } from "@/components/campaign/kpi-card";
 import { NoDataNotice } from "@/components/campaign/no-data-notice";
@@ -16,11 +26,13 @@ import {
 } from "@/components/line/line-charts";
 import { CreativeGallery, VideoList } from "@/components/line/creatives";
 import { DeliveryHeatmap } from "@/components/line/delivery-heatmap";
+import { KeywordTable } from "@/components/line/keyword-table";
 import { StageFunnel } from "@/components/line/funnel-card";
 import { ContractTable, DailyTable } from "@/components/line/line-tables";
 import { LineTitleBar } from "@/components/line/line-title-bar";
 import { VideoRates } from "@/components/line/video-rates";
-import { currencyFormat } from "@/components/motion/count-up";
+import { currencyCentsFormat, currencyFormat } from "@/components/motion/count-up";
+import { ClicksGauge, KeywordThemesChart, SearchDailyTrio } from "@/components/line/search-widgets";
 import { Reveal } from "@/components/motion/reveal";
 import { getLineSummary, isLineId, lineById, lineCumulative, lines } from "@/data";
 import { getLineDatasets } from "@/data/server";
@@ -33,6 +45,7 @@ import {
   formatProgress,
   formatUnitCost,
 } from "@/lib/format";
+import { keywordThemes } from "@/lib/keyword-themes";
 import { funnelStagesFor, LINE_LAYOUT } from "@/lib/line-layouts";
 import { audioRetentionSteps, videoRetentionSteps } from "@/lib/retention";
 
@@ -61,6 +74,11 @@ export default async function LinePage(props: PageProps<"/linhas/[slug]">) {
   const index = lines.findIndex((l) => l.id === slug);
   const prev = index > 0 ? lines[index - 1] : null;
   const next = index < lines.length - 1 ? lines[index + 1] : null;
+
+  // Pesquisa: página própria assim que a campanha existe (antes e depois da entrega).
+  if (slug === "rede-pesquisa" && summary.keywords.length > 0) {
+    return <SearchLinePage next={next} prev={prev} summary={summary} />;
+  }
 
   if (!summary.hasData) {
     return <NoDataLinePage next={next} prev={prev} summary={summary} />;
@@ -356,6 +374,120 @@ function LineBody({ summary, cumulative }: { summary: LineSummary; cumulative: C
         {retention}
       </section>
     </>
+  );
+}
+
+/** Rede de Pesquisa: big numbers, temas, corrida até a meta, top 10 e medidor. */
+function SearchLinePage({
+  summary,
+  prev,
+  next,
+}: {
+  summary: LineSummary;
+  prev: (typeof lines)[number] | null;
+  next: (typeof lines)[number] | null;
+}) {
+  const { line } = summary;
+  const color = line.color;
+  const impressions = summary.daily.reduce((acc, r) => acc + r.impressions, 0);
+  const groups = new Set(summary.keywords.map((k) => k.adGroup)).size;
+  const themes = keywordThemes(summary.keywords);
+  const since = summary.flight
+    ? new Intl.DateTimeFormat("pt-BR", {
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "America/Bahia",
+      })
+        .format(new Date(summary.flight.start))
+        .replace(",", " às")
+    : null;
+
+  return (
+    <div className="mx-auto flex w-full max-w-[1800px] flex-col gap-3 p-3 sm:p-4 fit:grid fit:h-full fit:grid-rows-[auto_auto_minmax(0,1fr)_minmax(0,1fr)]">
+      <div className="flex flex-col gap-2">
+        <LineTitleBar next={next} prev={prev} summary={summary} />
+        {!summary.hasData ? (
+          <p className="flex items-center gap-2 self-start rounded-full bg-status-good px-3 py-1 text-xs text-status-good-foreground">
+            <Radio aria-hidden className="size-3.5 shrink-0" />
+            <span>
+              <span className="font-semibold">Campanha no ar</span>
+              {since ? ` desde ${since}` : ""} · aguardando as primeiras impressões
+            </span>
+          </p>
+        ) : null}
+      </div>
+
+      {/* Big numbers */}
+      <section aria-label="Indicadores da pesquisa" className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+        <KpiCard
+          accent={color}
+          colored
+          hint={`de ${formatInt(line.contractedMetric)} contratados · ${formatProgress(summary.metricProgress)}`}
+          icon={MousePointerClick}
+          label="Cliques"
+          value={summary.delivered}
+        />
+        <KpiCard
+          accent="var(--brand-navy)"
+          format={currencyFormat}
+          hint={`de ${formatCurrencyInt(line.investment)} · ${formatProgress(summary.investmentProgress)}`}
+          icon={Wallet}
+          label="Investido"
+          value={summary.spent}
+        />
+        <KpiCard
+          accent="var(--brand-orange)"
+          empty={summary.realizedUnitCost === null}
+          format={currencyCentsFormat}
+          hint={`contratado ${formatUnitCost(line.contractedUnitCost ?? 0)}`}
+          icon={Coins}
+          label="CPC realizado"
+          value={summary.realizedUnitCost ?? 0}
+        />
+        <KpiCard
+          accent="var(--brand-cyan)"
+          empty={impressions === 0}
+          format={{ style: "percent", minimumFractionDigits: 2, maximumFractionDigits: 2 }}
+          hint={`${formatInt(impressions)} impressões`}
+          icon={Percent}
+          label="CTR"
+          value={impressions > 0 ? summary.delivered / impressions : 0}
+        />
+        <KpiCard
+          accent="var(--brand-lime)"
+          hint={`${groups} ${groups === 1 ? "grupo" : "grupos"} de anúncios`}
+          icon={KeyRound}
+          label="Palavras-chave"
+          value={summary.keywords.length}
+        />
+      </section>
+
+      <section className="grid gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] fit:min-h-0">
+        <ChartCard
+          description="Termos que mais aparecem nas palavras-chave da campanha (quantas palavras contêm cada termo)."
+          minHeight={260}
+          title="Sobre o que a campanha busca"
+        >
+          <KeywordThemesChart color={color} themes={themes} total={summary.keywords.length} />
+        </ChartCard>
+        <ChartCard description="Por dia, com o mesmo eixo de datas nos três painéis." minHeight={300} title="Cliques × CTR × CPC">
+          <SearchDailyTrio color={color} contractedCpc={line.contractedUnitCost} rows={summary.daily} />
+        </ChartCard>
+      </section>
+
+      <section className="grid gap-3 lg:grid-cols-[minmax(0,1.7fr)_minmax(0,0.8fr)] fit:min-h-0">
+        <ChartCard description="As 10 palavras-chave com mais cliques." flush minHeight={300} scroll title="Top 10 palavras-chave">
+          <div className="px-3 pb-2">
+            <KeywordTable color={color} keywords={summary.keywords} limit={10} />
+          </div>
+        </ChartCard>
+        <ChartCard description="Cliques entregues em relação à meta contratada." minHeight={240} title="Meta de cliques">
+          <ClicksGauge clicks={summary.delivered} goal={line.contractedMetric} />
+        </ChartCard>
+      </section>
+    </div>
   );
 }
 

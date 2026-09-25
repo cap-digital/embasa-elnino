@@ -5,7 +5,7 @@ import { lines } from "../lines";
 import { platformSpendToInvestment } from "../margins";
 import type { DailyRow, LineDataset, LineId } from "../types";
 import { todayInBahia } from "./env";
-import { fetchGoogleCampaigns, fetchGoogleCreatives, toDailyRows } from "./google-ads";
+import { fetchGoogleCampaigns, fetchGoogleCreatives, fetchGoogleKeywords, toDailyRows } from "./google-ads";
 import { fetchSpotifyCampaign } from "./spotify-ads";
 
 /**
@@ -76,6 +76,15 @@ const loadGoogle = unstable_cache(
         })
       : {};
 
+    // Palavras-chave das campanhas de pesquisa (inclusive sem entrega ainda).
+    const searchCampaigns = Object.values(byId).filter((c) => c.channel === "SEARCH");
+    const keywordsByCampaign = searchCampaigns.length
+      ? await fetchGoogleKeywords({
+          campaignIds: searchCampaigns.map((c) => c.id),
+          from: searchCampaigns.map((c) => c.flight?.start.slice(0, 10) ?? todayInBahia()).sort()[0],
+        })
+      : {};
+
     const result = {} as Record<GoogleLineId, LineDataset>;
     for (const [lineId, config] of Object.entries(GOOGLE_LINES) as Array<
       [GoogleLineId, (typeof GOOGLE_LINES)[GoogleLineId]]
@@ -108,6 +117,8 @@ const loadGoogle = unstable_cache(
         flight: data.flight ?? undefined,
         extras: hasDelivery ? data.extras : undefined,
         creatives: hasDelivery ? (creativesByCampaign[data.id] ?? []) : undefined,
+        keywords: keywordsByCampaign[data.id],
+        dailyBudget: data.dailyBudget ?? undefined,
         externalName: data.name,
         fetchedAt,
         message: hasDelivery ? undefined : "Campanha publicada, aguardando os primeiros dados.",
@@ -115,7 +126,7 @@ const loadGoogle = unstable_cache(
     }
     return result;
   },
-  ["google-ads-datasets-v3"],
+  ["google-ads-datasets-v5"],
   { revalidate: REVALIDATE_SECONDS, tags: ["google-ads"] }
 );
 
@@ -169,6 +180,14 @@ function applyMargin(dataset: LineDataset): LineDataset {
     creatives: dataset.creatives?.map((creative) => ({
       ...creative,
       spend: platformSpendToInvestment(dataset.lineId, creative.spend),
+    })),
+    dailyBudget:
+      dataset.dailyBudget !== undefined
+        ? platformSpendToInvestment(dataset.lineId, dataset.dailyBudget)
+        : undefined,
+    keywords: dataset.keywords?.map((keyword) => ({
+      ...keyword,
+      spend: platformSpendToInvestment(dataset.lineId, keyword.spend),
     })),
   };
 }

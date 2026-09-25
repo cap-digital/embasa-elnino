@@ -45,7 +45,7 @@ export function GoalRace({ summary }: { summary: LineSummary }) {
   return (
     <div className="relative flex flex-col gap-5">
       {/* Pista */}
-      <div className="relative pt-9 pb-7">
+      <div className="relative mx-6 pt-9 pb-7">
         {/* trilha */}
         <div className="relative h-3 rounded-full bg-[repeating-linear-gradient(90deg,var(--muted)_0_14px,color-mix(in_oklab,var(--muted)_40%,var(--card))_14px_28px)]">
           {/* rastro percorrido */}
@@ -153,9 +153,9 @@ export function GoalRace({ summary }: { summary: LineSummary }) {
         <Countdown
           icon={Flag}
           label={`Necessário / dia`}
-          value={perDayNeeded !== null ? formatCompact(perDayNeeded) : missing === 0 ? "meta batida" : "—"}
+          value={perDayNeeded !== null ? formatCompact(Math.ceil(perDayNeeded)) : missing === 0 ? "meta batida" : "—"}
         />
-        <Countdown icon={Gauge} label="Ritmo atual / dia" tone={color} value={perDayNow !== null ? formatCompact(perDayNow) : "—"} />
+        <Countdown icon={Gauge} label="Ritmo atual / dia" tone={color} value={perDayNow !== null ? formatCompact(Math.round(perDayNow)) : "—"} />
       </dl>
       <p className="-mt-2 text-[10px] text-muted-foreground">
         Projeção linear com base na entrega desde o início da veiculação ({strategy.metricLabel}).
