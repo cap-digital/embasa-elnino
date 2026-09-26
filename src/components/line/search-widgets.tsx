@@ -77,10 +77,13 @@ export function ClicksGauge({ clicks, goal }: { clicks: number; goal: number }) 
 }
 
 /**
- * Cliques × CTR × CPC por dia, em três painéis com o mesmo eixo de datas
- * (escalas diferentes não dividem um eixo). CPC contratado como referência.
+ * Cliques × CTR × CPC num único gráfico.
+ * Barras: cliques por dia (eixo esquerdo). Linhas: CTR acumulado (eixo direito)
+ * e CPC médio acumulado (escala própria, valores no tooltip) — acumulados para
+ * nunca "despencar" a zero num dia sem clique, quando o CPC do dia não existe.
+ * O gráfico começa no primeiro dia com clique (antes disso não há CPC).
  */
-export function SearchDailyTrio({
+export function SearchDailyCombo({
   rows,
   color,
   contractedCpc,
@@ -89,71 +92,94 @@ export function SearchDailyTrio({
   color: string;
   contractedCpc: number | null;
 }) {
-  const withData = rows.filter((r) => r.impressions > 0);
-  if (withData.length === 0) {
+  const firstClick = rows.findIndex((r) => r.delivered > 0);
+  if (firstClick === -1) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-2 py-8 text-center text-muted-foreground">
         <Hourglass aria-hidden className="size-5" />
         <p className="max-w-xs text-xs">
-          Cliques, CTR e CPC por dia aparecem aqui assim que a campanha registrar as primeiras impressões.
+          Cliques, CTR e CPC aparecem aqui assim que a campanha registrar os primeiros cliques.
         </p>
       </div>
     );
   }
-  const data = rows.map((r) => ({
-    date: new Date(`${r.date}T12:00:00Z`),
-    cliques: r.delivered,
-    ctr: r.impressions > 0 ? (r.delivered / r.impressions) * 100 : 0,
-    cpc: r.delivered > 0 ? r.spend / r.delivered : 0,
-    cpcContratado: contractedCpc ?? 0,
-  }));
-  const margin = { top: 8, right: 28, bottom: 8, left: 56 };
-  const panel = "h-[120px] w-full fit:h-auto fit:min-h-0 fit:flex-1";
+  const data: Array<{
+    date: Date;
+    cliques: number;
+    impressoes: number;
+    ctr: number;
+    cpc: number;
+    cpcContratado: number;
+    ctrDia: number | null;
+    cpcDia: number | null;
+  }> = [];
+  const totals = { clicks: 0, impressions: 0, spend: 0 };
+  for (const r of rows) {
+    totals.clicks += r.delivered;
+    totals.impressions += r.impressions;
+    totals.spend += r.spend;
+    data.push({
+      date: new Date(`${r.date}T12:00:00Z`),
+      cliques: r.delivered,
+      impressoes: r.impressions,
+      ctr: totals.impressions > 0 ? (totals.clicks / totals.impressions) * 100 : 0,
+      cpc: totals.clicks > 0 ? totals.spend / totals.clicks : 0,
+      cpcContratado: contractedCpc ?? 0,
+      ctrDia: r.impressions > 0 ? r.delivered / r.impressions : null,
+      cpcDia: r.delivered > 0 ? r.spend / r.delivered : null,
+    });
+  }
+  data.splice(0, firstClick);
 
   return (
-    <div className="flex h-full flex-col gap-1">
-      <PanelLabel color={color} label="Cliques" />
-      <ComposedChart aspectRatio="" className={panel} data={data} margin={margin} maxBarSize={22}>
+    <div className="flex h-full min-h-0 flex-col gap-2">
+      <ul className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+        <li className="flex items-center gap-1.5">
+          <span className="h-3 w-2.5 rounded-sm" style={{ backgroundColor: color }} />
+          <span className="font-semibold text-foreground">Cliques</span> eixo esquerdo
+        </li>
+        <li className="flex items-center gap-1.5">
+          <span className="h-0.5 w-4 rounded-full bg-brand-cyan" />
+          <span className="font-semibold text-foreground">CTR acumulado</span> eixo direito
+        </li>
+        <li className="flex items-center gap-1.5">
+          <span className="h-0.5 w-4 rounded-full bg-brand-orange" />
+          <span className="font-semibold text-foreground">CPC médio acumulado</span>
+          {contractedCpc ? <span>· tracejado: contratado {formatUnitCost(contractedCpc)}</span> : null}
+        </li>
+        <li className="text-[10px]">Passe o mouse para ver os valores de cada dia.</li>
+      </ul>
+      <ComposedChart
+        aspectRatio=""
+        className={CHART_FILL}
+        data={data}
+        margin={{ top: 12, right: 56, bottom: 36, left: 48 }}
+        maxBarSize={36}
+        padEdges
+      >
         <Grid horizontal strokeDasharray="0" />
-        <SeriesBar dataKey="cliques" fill={color} radius={3} />
-        <YAxis formatValue={formatCompact} numTicks={3} />
-        <ChartTooltip rows={(p) => [{ color, label: "Cliques", value: formatInt(p.cliques as number) }]} showDots={false} />
-      </ComposedChart>
-
-      <PanelLabel color="var(--brand-cyan)" label="CTR" />
-      <ComposedChart aspectRatio="" className={panel} data={data} margin={margin}>
-        <Grid horizontal strokeDasharray="0" />
-        <Line curve={curveMonotoneX} dataKey="ctr" fadeEdges={false} stroke="var(--brand-cyan)" strokeWidth={2.5} />
-        <YAxis formatValue={(v) => `${v.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`} numTicks={3} />
-        <ChartTooltip rows={(p) => [{ color: "var(--brand-cyan)", label: "CTR", value: formatPercent((p.ctr as number) / 100, 2) }]} />
-      </ComposedChart>
-
-      <PanelLabel color="var(--brand-orange)" label="CPC" note={contractedCpc ? `tracejado: contratado ${formatUnitCost(contractedCpc)}` : undefined} />
-      <ComposedChart aspectRatio="" className={panel} data={data} margin={{ ...margin, bottom: 36 }}>
-        <Grid horizontal strokeDasharray="0" />
-        <Line curve={curveMonotoneX} dataKey="cpc" fadeEdges={false} stroke="var(--brand-orange)" strokeWidth={2.5} />
+        <SeriesBar dataKey="cliques" fill={color} radius={4} />
+        <Line curve={curveMonotoneX} dataKey="ctr" fadeEdges={false} showMarkers stroke="var(--brand-cyan)" strokeWidth={2.5} yAxisId="ctr" />
+        <Line curve={curveMonotoneX} dataKey="cpc" fadeEdges={false} showMarkers stroke="var(--brand-orange)" strokeWidth={2.5} yAxisId="cpc" />
         {contractedCpc ? (
-          <Line dashFromIndex={0} dataKey="cpcContratado" fadeEdges={false} showHighlight={false} stroke="var(--muted-foreground)" strokeWidth={1.5} />
+          <Line dashFromIndex={0} dataKey="cpcContratado" fadeEdges={false} showHighlight={false} stroke="var(--brand-orange)" strokeWidth={1.25} yAxisId="cpc" />
         ) : null}
-        <YAxis formatValue={(v) => formatUnitCost(v)} numTicks={3} />
+        <YAxis formatValue={formatCompact} numTicks={4} />
+        <YAxis
+          formatValue={(v) => `${v.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`}
+          numTicks={4}
+          orientation="right"
+          yAxisId="ctr"
+        />
         <XAxis numTicks={6} />
         <ChartTooltip
           rows={(p) => [
-            { color: "var(--brand-orange)", label: "CPC", value: formatUnitCost(p.cpc as number) },
-            ...(contractedCpc ? [{ color: "var(--muted-foreground)", label: "CPC contratado", value: formatUnitCost(contractedCpc) }] : []),
+            { color, label: "Cliques", value: formatInt(p.cliques as number) },
+            { color: "var(--brand-cyan)", label: "CTR", value: p.ctrDia === null ? "—" : formatPercent(p.ctrDia as number, 2) },
+            { color: "var(--brand-orange)", label: "CPC", value: p.cpcDia === null ? "sem cliques" : formatUnitCost(p.cpcDia as number) },
           ]}
         />
       </ComposedChart>
     </div>
-  );
-}
-
-function PanelLabel({ label, color, note }: { label: string; color: string; note?: string }) {
-  return (
-    <p className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-      <span className="size-2 rounded-full" style={{ backgroundColor: color }} />
-      {label}
-      {note ? <span className="font-normal normal-case tracking-normal">· {note}</span> : null}
-    </p>
   );
 }

@@ -32,7 +32,7 @@ import { ContractTable, DailyTable } from "@/components/line/line-tables";
 import { LineTitleBar } from "@/components/line/line-title-bar";
 import { VideoRates } from "@/components/line/video-rates";
 import { currencyCentsFormat, currencyFormat } from "@/components/motion/count-up";
-import { ClicksGauge, KeywordThemesChart, SearchDailyTrio } from "@/components/line/search-widgets";
+import { ClicksGauge, KeywordThemesChart, SearchDailyCombo } from "@/components/line/search-widgets";
 import { Reveal } from "@/components/motion/reveal";
 import { getLineSummary, isLineId, lineById, lineCumulative, lines } from "@/data";
 import { getLineDatasets } from "@/data/server";
@@ -469,8 +469,8 @@ function SearchLinePage({
         >
           <KeywordThemesChart color={color} themes={themes} total={summary.keywords.length} />
         </ChartCard>
-        <ChartCard description="Por dia, com o mesmo eixo de datas nos três painéis." minHeight={300} title="Cliques × CTR × CPC">
-          <SearchDailyTrio color={color} contractedCpc={line.contractedUnitCost} rows={summary.daily} />
+        <ChartCard description="Cliques por dia em barras; CTR e CPC médio acumulados em linhas, cada um na sua escala." minHeight={300} title="Cliques × CTR × CPC">
+          <SearchDailyCombo color={color} contractedCpc={line.contractedUnitCost} rows={summary.daily} />
         </ChartCard>
       </section>
 

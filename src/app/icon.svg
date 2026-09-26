@@ -1,0 +1,65 @@
+<svg id="Camada_1" xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="11.50 5.46 69.31 69.31">
+  
+  <defs>
+    <style>
+      .st0 {
+        fill: #1860aa;
+      }
+
+      .st1 {
+        fill: url(#radial-gradient);
+      }
+
+      .st2 {
+        fill: url(#radial-gradient1);
+      }
+
+      .st3 {
+        fill: url(#radial-gradient2);
+      }
+
+      .st4 {
+        fill: url(#Gradiente_sem_nome_3);
+      }
+
+      .st5 {
+        fill: url(#radial-gradient3);
+      }
+    </style>
+    <radialGradient id="radial-gradient" cx="56.18" cy="42.07" fx="56.18" fy="42.07" r="22.18" gradientUnits="userSpaceOnUse">
+      <stop offset=".06" stop-color="#f49b00"/>
+      <stop offset=".39" stop-color="#ef8600"/>
+      <stop offset=".64" stop-color="#ee7d00"/>
+      <stop offset=".94" stop-color="#1860aa"/>
+    </radialGradient>
+    <radialGradient id="radial-gradient1" cx="70.1" cy="60.74" fx="70.1" fy="60.74" r="13.82" gradientTransform="translate(72.19 134.22) rotate(-109.15) scale(1 .36)" gradientUnits="userSpaceOnUse">
+      <stop offset=".18" stop-color="#f49b00"/>
+      <stop offset=".81" stop-color="#ee7d00"/>
+    </radialGradient>
+    <radialGradient id="radial-gradient2" cx="51.84" cy="15.53" fx="51.84" fy="15.53" r="38.45" gradientTransform="translate(101.14 -1.43) rotate(154.84) scale(1 .36)" gradientUnits="userSpaceOnUse">
+      <stop offset=".22" stop-color="#4fbbbd"/>
+      <stop offset=".69" stop-color="#1487c9"/>
+      <stop offset=".93" stop-color="#1860aa"/>
+    </radialGradient>
+    <radialGradient id="Gradiente_sem_nome_3" data-name="Gradiente sem nome 3" cx="37.87" cy="46.11" fx="37.87" fy="71.52" r="28.37" gradientTransform="translate(-36.03 41.98) rotate(-56.03) scale(1 1.38)" gradientUnits="userSpaceOnUse">
+      <stop offset=".14" stop-color="#e7e11f"/>
+      <stop offset=".6" stop-color="#76b737"/>
+      <stop offset=".75" stop-color="#2b9649"/>
+      <stop offset="1" stop-color="#2baee5"/>
+    </radialGradient>
+    <radialGradient id="radial-gradient3" cx="71.69" cy="28.17" fx="71.69" fy="39.31" r="22.58" gradientTransform="translate(45.16 -56.68) rotate(36.37) scale(1 1.87)" gradientUnits="userSpaceOnUse">
+      <stop offset=".2" stop-color="#81cff4"/>
+      <stop offset=".5" stop-color="#2baee5"/>
+      <stop offset=".76" stop-color="#1487c9"/>
+      <stop offset="1" stop-color="#1860aa"/>
+    </radialGradient>
+  </defs>
+  
+  <g>
+    <path class="st1" d="M53.98,40.02c-.71,1.14-1.48,2.32-2.31,3.59,0,0,0,0,0,0-2.26-.85-5.9-1.51-8.42-1.06-4.57.82-5.58,3.25-5.54,4.8,0,0,0,0,0,0-.15-.2-.95-1.02-1.82-2.88,0,0,0,0,0,0,0,0,0,0,0,0h0c.33-1.53,3.45-9.66,17.99-4.47h0s.08.02.12.04Z"/>
+    <path class="st2" d="M70.56,54.2s0,.04-.02.13c0,.02,0,.04,0,.06,0,.05-.01.1-.03.16,0,.03,0,.06-.02.1-.08.47-.25,1.26-.65,2.26-.03.07-.06.15-.09.22-.08.19-.17.39-.26.59-.04.08-.07.15-.11.23-.23.46-.5.95-.82,1.45-.81,1.28-2.18,2.7-4.01,3.96,3.31-2.9,1.84-7.98,1.17-9.77,1.32-.69,2.56-1.5,3.69-2.42.39.66.82,1.68,1.15,3.02Z"/>
+    <path class="st3" d="M57.47,17.65c-3.93-2.51-14.84-4.77-21.93-.13-9.04,5.92-10.64,13.18-10.7,18.57-.49-5.16-.4-10.33,2.25-16.69,1.38-3.31,3.74-5.83,5.03-7.06,2.46-1.36,5.66-2.3,8.45-3,1.56-.39,3.62-.62,5.24-.67h0c4.43.48,9.25,4.33,11.67,8.97Z"/>
+    <path class="st4" d="M69.65,61.36c-1.78,3.39-4.86,6.31-8.76,7.96-19.02,8.05-44.09-5.99-45.73-26.11-.97-11.83,6.8-25.61,16.98-30.89l-.03.03c-1.29,1.23-3.65,3.75-5.03,7.06-2.65,6.36-2.74,11.53-2.25,16.69h0c.89,9.3,4.22,15.82,8.47,21.02,3.92,4.8,10.31,9.71,19.86,9.68,4.76-.02,8.61-1.52,11.38-3.42,1.84-1.26,3.2-2.68,4.01-3.96.32-.51.59-.99.82-1.45.04-.08.07-.15.11-.23.09-.2.18-.4.26-.59.03-.08.06-.15.09-.22.39-1,.57-1.79.65-2.26,0-.03.01-.07.02-.1.01-.06.02-.12.03-.16,0-.02,0-.04,0-.06.01-.09.02-.13.02-.13,0,0,0,0,0,0,.16,1.35.81,3.86-.91,7.15Z"/>
+    <path class="st5" d="M72.88,47.46c-.96,1.41-2.14,2.64-3.47,3.73-1.13.92-2.37,1.72-3.69,2.42-6.28,3.3-14.32,4.16-20.35,3.06-4.1-.75-6.9-3.01-8.25-4.84-1.18-1.59-1.45-3.62-1.45-5.14,0-1.27.19-2.19.2-2.23,0,0,0,0,0,0,0,0,0,0,0,0,.87,1.86,1.67,2.68,1.82,2.88,0,0,0,0,0,0,2.85,3.82,7.98,2.55,11.32-.79.39-.39.9-.9,1.39-1.43.49-.53.95-1.07,1.25-1.53,0,0,0,0,0,0,.83-1.26,1.6-2.44,2.31-3.59,2.94-4.74,4.76-8.89,5.05-16.09.09-2.11-.51-4.27-1.56-6.28-2.42-4.65-7.24-8.5-11.67-8.97,11.35-.64,24.13,5.7,28.39,13.34,4.25,7.64,4.33,17.19-1.31,25.45Z"/>
+  </g>
+</svg>

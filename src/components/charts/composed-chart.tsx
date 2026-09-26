@@ -43,6 +43,11 @@ export interface ComposedChartProps {
   /** Gap in px between stacked segments. Default: 0 */
   stackGap?: number;
   onPhaseChange?: (phase: ChartPhase) => void;
+  /**
+   * Adiciona meia coluna de folga antes do primeiro e depois do último ponto,
+   * para barras nas pontas não ficarem cortadas pela borda do gráfico.
+   */
+  padEdges?: boolean;
 }
 
 const DEFAULT_MARGIN: Margin = { top: 40, right: 40, bottom: 40, left: 40 };
@@ -191,6 +196,7 @@ interface ChartInnerProps {
   stacked?: boolean;
   stackGap?: number;
   onPhaseChange?: (phase: ChartPhase) => void;
+  padEdges?: boolean;
 }
 
 function ChartInner({
@@ -211,6 +217,7 @@ function ChartInner({
   stacked = false,
   stackGap = 0,
   onPhaseChange,
+  padEdges = false,
 }: ChartInnerProps) {
   const { lines, barDataKeys } = useMemo(
     () => extractComposedSeries(children),
@@ -249,6 +256,22 @@ function ChartInner({
     [data, lines, barDataKeys, stacked]
   );
 
+  const paddedDomain = useMemo((): [Date, Date] | undefined => {
+    if (!padEdges || data.length === 0) {
+      return undefined;
+    }
+    const times = data
+      .map((d) => d[xDataKey])
+      .filter((v): v is Date => v instanceof Date)
+      .map((d) => d.getTime())
+      .sort((a, b) => a - b);
+    if (times.length === 0) {
+      return undefined;
+    }
+    const step = times.length > 1 ? (times.at(-1)! - times[0]) / (times.length - 1) : 86_400_000;
+    return [new Date(times[0] - step / 2), new Date(times.at(-1)! + step / 2)];
+  }, [padEdges, data, xDataKey]);
+
   return (
     <TimeSeriesChartInner
       animationDuration={animationDuration}
@@ -271,6 +294,8 @@ function ChartInner({
       revealSignature={revealSignature}
       width={width}
       xDataKey={xDataKey}
+      xDomain={paddedDomain}
+      xDomainSlotCount={paddedDomain ? data.length + 1 : undefined}
       yScaleDomainMax={yScaleDomainMax}
     >
       {children}
@@ -295,6 +320,7 @@ export function ComposedChart({
   stacked = false,
   stackGap = 0,
   onPhaseChange,
+  padEdges = false,
 }: ComposedChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const margin = { ...DEFAULT_MARGIN, ...marginProp };
@@ -319,6 +345,7 @@ export function ComposedChart({
             margin={margin}
             maxBarSize={maxBarSize}
             onPhaseChange={onPhaseChange}
+            padEdges={padEdges}
             revealSignature={revealSignature}
             stacked={stacked}
             stackGap={stackGap}
