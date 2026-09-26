@@ -3,7 +3,9 @@ import { getLineDatasets } from "@/data/server";
 import type { LineId } from "@/data/types";
 
 /** Dados reais das linhas do Google Ads, normalizados. Cache de 1h. */
-export const revalidate = 3600;
+// Renderiza a cada acesso lendo o cache de dados das APIs (1h, em
+// src/data/server/sources.ts). Assim o botão "Atualizar dados" aparece na hora.
+export const dynamic = "force-dynamic";
 
 const GOOGLE_LINE_IDS: LineId[] = ["rede-display", "rede-pesquisa", "youtube-shorts", "youtube-instream"];
 

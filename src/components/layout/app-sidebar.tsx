@@ -23,6 +23,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useSyncExternalStore } from "react";
+import { RefreshDataButton } from "@/components/layout/refresh-data-button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { campaign, lines, strategies, strategyOrder } from "@/data";
 import type { LineId } from "@/data/types";
@@ -72,7 +73,7 @@ function subscribeCollapsed(onChange: () => void) {
   };
 }
 
-export function AppSidebar() {
+export function AppSidebar({ lastUpdated }: { lastUpdated: string | null }) {
   const pathname = usePathname();
   const collapsed = useSyncExternalStore(subscribeCollapsed, readCollapsed, () => false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -136,7 +137,7 @@ export function AppSidebar() {
             <div className="min-h-0 flex-1 overflow-y-auto px-2 py-3">
               <SidebarNav collapsed={false} pathname={pathname} />
             </div>
-            <SidebarFooter collapsed={false} />
+            <SidebarFooter collapsed={false} lastUpdated={lastUpdated} />
           </aside>
         </div>
       ) : null}
@@ -157,7 +158,7 @@ export function AppSidebar() {
           {nav}
         </div>
 
-        <SidebarFooter collapsed={collapsed} />
+        <SidebarFooter collapsed={collapsed} lastUpdated={lastUpdated} />
 
         <TooltipProvider delay={150}>
           <Tooltip>
@@ -337,22 +338,25 @@ function NavItem({
   );
 }
 
-function SidebarFooter({ collapsed }: { collapsed: boolean }) {
+function SidebarFooter({ collapsed, lastUpdated }: { collapsed: boolean; lastUpdated: string | null }) {
   const period = `${formatDateShort(campaign.startDate)} — ${formatDate(campaign.endDate)}`;
   return (
-    <div className={cn("shrink-0 border-t border-border px-3 py-3 text-[11px] text-muted-foreground", collapsed && "px-0 text-center")}>
-      {collapsed ? (
-        <span className="flex flex-col items-center gap-1" title={`Período da campanha: ${period}`}>
-          <CalendarDays aria-hidden className="size-4" />
-          <span className="font-semibold tabular-nums">{formatDateShort(campaign.endDate)}</span>
-        </span>
-      ) : (
-        <p className="flex items-center gap-2">
-          <CalendarDays aria-hidden className="size-3.5 shrink-0" />
-          <span className="sr-only">Período da campanha:</span>
-          <span className="truncate font-medium text-foreground">{period}</span>
-        </p>
-      )}
-    </div>
+    <TooltipProvider delay={150}>
+      <div className={cn("flex shrink-0 flex-col gap-2 border-t border-border px-3 py-3 text-[11px] text-muted-foreground", collapsed && "items-center px-0 text-center")}>
+        <RefreshDataButton collapsed={collapsed} lastUpdated={lastUpdated} />
+        {collapsed ? (
+          <span className="flex flex-col items-center gap-1" title={`Período da campanha: ${period}`}>
+            <CalendarDays aria-hidden className="size-4" />
+            <span className="font-semibold tabular-nums">{formatDateShort(campaign.endDate)}</span>
+          </span>
+        ) : (
+          <p className="flex items-center gap-2">
+            <CalendarDays aria-hidden className="size-3.5 shrink-0" />
+            <span className="sr-only">Período da campanha:</span>
+            <span className="truncate font-medium text-foreground">{period}</span>
+          </p>
+        )}
+      </div>
+    </TooltipProvider>
   );
 }

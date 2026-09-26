@@ -7,8 +7,9 @@ import { Reveal } from "@/components/motion/reveal";
 import { campaign, lines } from "@/data";
 import { formatCurrencyInt, formatDate } from "@/lib/format";
 
-// Números-chave com dados reais das APIs (cache de 1h).
-export const revalidate = 3600;
+// Renderiza a cada acesso lendo o cache de dados das APIs (1h, em
+// src/data/server/sources.ts). Assim o botão "Atualizar dados" aparece na hora.
+export const dynamic = "force-dynamic";
 
 export default function LandingPage() {
   return (

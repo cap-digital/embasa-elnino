@@ -49,12 +49,9 @@ import { keywordThemes } from "@/lib/keyword-themes";
 import { funnelStagesFor, LINE_LAYOUT } from "@/lib/line-layouts";
 import { audioRetentionSteps, videoRetentionSteps } from "@/lib/retention";
 
-// Dados reais das APIs com cache de 1h.
-export const revalidate = 3600;
-
-export function generateStaticParams() {
-  return lines.map((line) => ({ slug: line.id }));
-}
+// Renderiza a cada acesso lendo o cache de dados das APIs (1h, em
+// src/data/server/sources.ts). Assim o botão "Atualizar dados" aparece na hora.
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata(props: PageProps<"/linhas/[slug]">): Promise<Metadata> {
   const { slug } = await props.params;

@@ -23,8 +23,9 @@ import { formatCurrencyInt, formatProgress } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Visão geral" };
 
-// Dados reais das APIs com cache de 1h.
-export const revalidate = 3600;
+// Renderiza a cada acesso lendo o cache de dados das APIs (1h, em
+// src/data/server/sources.ts). Assim o botão "Atualizar dados" aparece na hora.
+export const dynamic = "force-dynamic";
 
 export default async function OverviewPage() {
   const datasets = await getLineDatasets();
