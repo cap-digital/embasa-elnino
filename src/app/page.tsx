@@ -13,17 +13,18 @@ export const dynamic = "force-dynamic";
 
 export default function LandingPage() {
   return (
-    <div className="hero-grain relative h-full overflow-y-auto text-white">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-32 -right-32 size-[34rem] rounded-full opacity-40 blur-3xl"
-        style={{ background: "radial-gradient(circle, var(--brand-cyan), transparent 65%)" }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-40 -left-24 size-[30rem] rounded-full opacity-30 blur-3xl"
-        style={{ background: "radial-gradient(circle, var(--brand-lime), transparent 65%)" }}
-      />
+    <div className="hero-grain relative h-full overflow-x-hidden overflow-y-auto text-white">
+      {/* Camada recortada: as bolhas saem das bordas sem gerar rolagem. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div
+          className="absolute -top-32 -right-32 size-[34rem] rounded-full opacity-40 blur-3xl"
+          style={{ background: "radial-gradient(circle, var(--brand-cyan), transparent 65%)" }}
+        />
+        <div
+          className="absolute -bottom-40 -left-24 size-[30rem] rounded-full opacity-30 blur-3xl"
+          style={{ background: "radial-gradient(circle, var(--brand-lime), transparent 65%)" }}
+        />
+      </div>
 
       <div className="relative mx-auto flex min-h-full w-full max-w-5xl flex-col justify-center px-5 py-10 sm:px-8">
         <Reveal className="flex flex-wrap items-center gap-4" y={10}>
