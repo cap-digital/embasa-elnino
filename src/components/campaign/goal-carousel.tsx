@@ -19,7 +19,6 @@ import { NoDataNotice } from "./no-data-notice";
 import { GoalRace } from "./goal-race";
 import { GoalBadge, PaceBadge } from "./pace-badge";
 import { ProgressBar } from "./progress-bar";
-import { SourceBadge } from "./source-badge";
 
 const pad = (n: number) => String(n).padStart(2, "0");
 
@@ -198,7 +197,6 @@ function SpotlightCard({ summary, position }: { summary: LineSummary; position: 
           {line.channel} · {strategy.label}
         </p>
         <div className="flex flex-wrap items-center gap-1">
-          <SourceBadge source={summary.source} status={summary.status} />
           {summary.hasData ? <PaceBadge size="md" status={summary.paceStatus} /> : null}
           {summary.hasData && summary.goalReached ? <GoalBadge /> : null}
         </div>

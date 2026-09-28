@@ -5,7 +5,6 @@ import { formatCurrencyInt, formatInt, formatPercent, formatUnitCost } from "@/l
 import { cn } from "@/lib/utils";
 import { NoDataNotice } from "./no-data-notice";
 import { GoalBadge, PaceBadge } from "./pace-badge";
-import { SourceBadge } from "./source-badge";
 import { ProgressBar } from "./progress-bar";
 
 /** Cartão de meta por linha: duas barras (métrica e investimento) + custo unitário. */
@@ -49,7 +48,6 @@ export function LineGoalCard({ summary, className }: { summary: LineSummary; cla
       <div className="flex flex-wrap items-center gap-1">
         {summary.hasData ? <PaceBadge status={summary.paceStatus} /> : null}
         {summary.hasData && summary.goalReached ? <GoalBadge /> : null}
-        <SourceBadge source={summary.source} status={summary.status} />
       </div>
 
       {summary.hasData ? (

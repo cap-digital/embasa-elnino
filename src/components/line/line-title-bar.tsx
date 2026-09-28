@@ -1,7 +1,6 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { DoneBadge, GoalBadge, PaceBadge } from "@/components/campaign/pace-badge";
-import { SourceBadge } from "@/components/campaign/source-badge";
 import type { ContractedLine, LineSummary } from "@/data/types";
 
 export function LineTitleBar({
@@ -30,7 +29,6 @@ export function LineTitleBar({
         {summary.hasData ? <PaceBadge status={summary.paceStatus} /> : null}
         {summary.hasData && summary.goalReached ? <GoalBadge /> : null}
         {summary.investmentComplete ? <DoneBadge /> : null}
-        <SourceBadge fetchedAt={summary.fetchedAt} source={summary.source} status={summary.status} />
       </div>
       <nav aria-label="Navegação entre plataformas" className="flex items-center gap-1 text-xs">
         {prev ? (

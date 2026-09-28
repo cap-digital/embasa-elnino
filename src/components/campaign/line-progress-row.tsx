@@ -5,7 +5,6 @@ import { formatCurrencyInt, formatInt, formatPercent, formatUnitCost } from "@/l
 import { cn } from "@/lib/utils";
 import { NoDataNotice } from "./no-data-notice";
 import { GoalBadge, PaceBadge } from "./pace-badge";
-import { SourceBadge } from "./source-badge";
 import { ProgressBar } from "./progress-bar";
 
 /** Linha compacta do progresso por plataforma (lista rolável da visão geral). */
@@ -38,7 +37,6 @@ export function LineProgressRow({ summary, className }: { summary: LineSummary; 
             </span>
           </p>
           <span className="flex flex-wrap items-center gap-1">
-            <SourceBadge source={summary.source} status={summary.status} />
             {summary.hasData && summary.goalReached ? <GoalBadge /> : null}
             {summary.hasData ? <PaceBadge status={summary.paceStatus} /> : null}
             <ArrowUpRight aria-hidden className="size-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
