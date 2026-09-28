@@ -164,6 +164,7 @@ function complementaryFor(
         cpv: safeDiv(spentRaw, delivered),
         impressions,
         vtr: safeDiv(delivered, impressions),
+        clicks,
         quartiles: extras?.quartiles ?? { q25: 0, q50: 0, q75: 0, q100: 0 },
       };
     case "escutas": {

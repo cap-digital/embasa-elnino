@@ -8,9 +8,10 @@ import { useChartStable, useYScale } from "./chart-context";
  *
  * - Em linhas/áreas, o rótulo desvia da linha conforme a inclinação.
  * - Largura de cada rótulo estimada pelo nº de caracteres; da direita para a
- *   esquerda (o dia mais recente sempre aparece), um rótulo só entra se não
- *   encosta no anterior. Com muitos pontos, mostra um a cada N.
- * - Rótulo que sairia pelo topo desce para baixo do ponto.
+ *   esquerda (o dia mais recente sempre aparece), um rótulo só entra se a
+ *   caixa dele não colide com nenhuma já escolhida. Com muitos pontos, mostra
+ *   um a cada N.
+ * - Rótulo que sairia pelo topo desce para baixo do ponto (e vice-versa na base).
  * - Contorno na cor do card para ler bem sobre linhas, áreas e grade.
  *
  * Usa `valueKey` (e não `dataKey`) para não ser contado como série pelos gráficos.
@@ -30,15 +31,19 @@ interface Candidate {
 
 const estimateWidth = (text: string) => text.length * CHAR_WIDTH + PADDING;
 
-/** Mantém só os rótulos que cabem lado a lado, priorizando o fim da série. */
+const overlaps = (a: Candidate, b: Candidate) =>
+  Math.abs(a.x - b.x) < (a.width + b.width) / 2 + MIN_GAP && Math.abs(a.y - b.y) < FONT_SIZE + 2;
+
+/**
+ * Mantém só os rótulos que não colidem (caixa de texto contra caixa de texto),
+ * priorizando o fim da série. Rótulos em alturas diferentes podem ficar lado a lado.
+ */
 function thinOut(candidates: Candidate[]): Candidate[] {
   const kept: Candidate[] = [];
-  let leftEdge = Number.POSITIVE_INFINITY;
   for (let i = candidates.length - 1; i >= 0; i--) {
     const c = candidates[i];
-    if (c.x + c.width / 2 + MIN_GAP <= leftEdge) {
+    if (!kept.some((k) => overlaps(c, k))) {
       kept.push(c);
-      leftEdge = c.x - c.width / 2;
     }
   }
   return kept;
@@ -99,7 +104,7 @@ export function ValueLabels({
   hideZero = true,
   mode = "point",
 }: ValueLabelsProps) {
-  const { data, xScale, xAccessor, innerWidth, margin } = useChartStable();
+  const { data, xScale, xAccessor, innerWidth, innerHeight, margin } = useChartStable();
   const yScale = useYScale(yAxisId);
   const style = useFadeIn();
 
@@ -149,6 +154,9 @@ export function ValueLabels({
       const above = p.py - offset;
       if (!below && above - FONT_SIZE / 2 < topLimit) {
         below = true;
+      } else if (below && p.py + offset + FONT_SIZE / 2 > innerHeight) {
+        // Sem espaço abaixo (base do gráfico): volta para cima do ponto.
+        below = false;
       }
       candidates.push({
         text: p.text,
@@ -158,7 +166,7 @@ export function ValueLabels({
       });
     });
     return thinOut(candidates);
-  }, [data, valueKey, hideZero, format, xScale, xAccessor, yScale, offset, innerWidth, margin, mode]);
+  }, [data, valueKey, hideZero, format, xScale, xAccessor, yScale, offset, innerWidth, innerHeight, margin, mode]);
 
   return (
     <g pointerEvents="none" style={style}>

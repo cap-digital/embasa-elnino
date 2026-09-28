@@ -12,7 +12,11 @@ interface Item {
 const decimalOne: Format = { minimumFractionDigits: 1, maximumFractionDigits: 1 };
 const percentTwo: Format = { style: "percent", minimumFractionDigits: 2, maximumFractionDigits: 2 };
 
-export function complementaryItems(m: Metrics): Item[] {
+/**
+ * `clicksInsteadOfMetric`: troca a métrica contratada (já no KPI do topo da
+ * página) por Cliques, para não repetir o número.
+ */
+export function complementaryItems(m: Metrics, clicksInsteadOfMetric = false): Item[] {
   switch (m.strategy) {
     case "alcance":
       return [
@@ -38,7 +42,7 @@ export function complementaryItems(m: Metrics): Item[] {
       ];
     case "visualizacoes":
       return [
-        { label: "Visualizações", value: m.views },
+        clicksInsteadOfMetric ? { label: "Cliques", value: m.clicks } : { label: "Visualizações", value: m.views },
         { label: "CPV realizado", value: m.cpv, format: currencyCentsFormat },
         { label: "Impressões", value: m.impressions },
         { label: "VTR", value: m.vtr, format: percentOneDigitFormat, hint: "visualizações ÷ impressões" },
@@ -68,8 +72,16 @@ export function complementaryItems(m: Metrics): Item[] {
 }
 
 /** Grade compacta das métricas complementares da estratégia. */
-export function ComplementaryMetrics({ metrics, color }: { metrics: Metrics; color: string }) {
-  const items = complementaryItems(metrics);
+export function ComplementaryMetrics({
+  metrics,
+  color,
+  clicksInsteadOfMetric = false,
+}: {
+  metrics: Metrics;
+  color: string;
+  clicksInsteadOfMetric?: boolean;
+}) {
+  const items = complementaryItems(metrics, clicksInsteadOfMetric);
   return (
     <dl className="grid grid-cols-2 gap-2">
       {items.map((item, index) => (

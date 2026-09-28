@@ -110,6 +110,7 @@ export interface VisualizacoesMetrics {
   cpv: number;
   impressions: number;
   vtr: number;
+  clicks: number;
   quartiles: { q25: number; q50: number; q75: number; q100: number };
 }
 
@@ -169,6 +170,8 @@ export interface Creative {
   image?: { url: string; width: number; height: number };
   /** Vídeo do YouTube. */
   video?: { youtubeId: string; title: string; isShort: boolean };
+  /** Vídeo no Google Drive (planilha): prévia e player embutido, sem link para o Drive. */
+  driveVideo?: { fileId: string };
   impressions: number;
   clicks: number;
   /** Investimento (já convertido pela margem da plataforma). */

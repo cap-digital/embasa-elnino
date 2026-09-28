@@ -1,6 +1,7 @@
 import { ExternalLink, Play } from "lucide-react";
 import Image from "next/image";
 import type { Creative } from "@/data/types";
+import { DriveVideoPreview } from "./drive-video";
 import { formatCompact, formatCurrency, formatInt, formatPercent, formatUnitCost } from "@/lib/format";
 
 const safe = (a: number, b: number) => (b > 0 ? a / b : 0);
@@ -66,57 +67,74 @@ export function CreativeGallery({ creatives, color }: { creatives: Creative[]; c
   );
 }
 
-/** Vídeos (YouTube) com miniatura, link para assistir e métricas por vídeo. */
+/**
+ * Vídeos com miniatura e métricas por vídeo. YouTube: link para assistir.
+ * Google Drive: toca no próprio card, sem link para o Drive.
+ */
 export function VideoList({ creatives, color }: { creatives: Creative[]; color: string }) {
-  const videos = creatives.filter((c) => c.video);
+  const videos = creatives.filter((c) => c.video || c.driveVideo);
   if (videos.length === 0) {
     return <p className="p-2 text-xs text-muted-foreground">Nenhum vídeo com entrega no período.</p>;
   }
   return (
     <ul className="flex flex-col gap-3">
       {videos.map((c) => {
-        const v = c.video!;
-        const href = v.isShort ? `https://www.youtube.com/shorts/${v.youtubeId}` : `https://www.youtube.com/watch?v=${v.youtubeId}`;
+        const v = c.video;
+        const href = v
+          ? v.isShort
+            ? `https://www.youtube.com/shorts/${v.youtubeId}`
+            : `https://www.youtube.com/watch?v=${v.youtubeId}`
+          : null;
         const q = c.quartiles;
         return (
-          <li className="flex min-w-0 flex-col gap-3 rounded-xl border border-border bg-background p-2.5 @sm:flex-row" key={c.id}>
-            <a
-              aria-label={`Assistir “${v.title}” no YouTube`}
-              className="group relative block aspect-video w-full shrink-0 overflow-hidden rounded-lg bg-muted @sm:w-44"
-              href={href}
-              rel="noopener noreferrer"
-              target="_blank"
-            >
-              <Image
-                alt={`Miniatura do vídeo ${v.title}`}
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                fill
-                sizes="(min-width: 640px) 176px, 100vw"
-                src={`https://i.ytimg.com/vi/${v.youtubeId}/hqdefault.jpg`}
-              />
-              <span className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors group-hover:bg-black/35">
-                <span className="flex size-10 items-center justify-center rounded-full bg-white/95 text-brand-navy shadow-md">
-                  <Play aria-hidden className="ml-0.5 size-5 fill-current" />
-                </span>
-              </span>
-            </a>
-            <div className="min-w-0 flex-1">
-              <p className="line-clamp-2 text-sm font-semibold leading-snug">{v.title || c.name}</p>
+          <li className="flex min-w-0 flex-col gap-3 rounded-xl border border-border bg-background p-2.5 @sm:flex-row @sm:flex-wrap" key={c.id}>
+            {v && href ? (
               <a
-                className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-brand-blue hover:underline"
+                aria-label={`Assistir “${v.title}” no YouTube`}
+                className="group relative block aspect-video w-full shrink-0 overflow-hidden rounded-lg bg-muted @sm:w-44"
                 href={href}
                 rel="noopener noreferrer"
                 target="_blank"
               >
-                Assistir no YouTube <ExternalLink aria-hidden className="size-3" />
+                <Image
+                  alt={`Miniatura do vídeo ${v.title}`}
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  fill
+                  sizes="(min-width: 640px) 176px, 100vw"
+                  src={`https://i.ytimg.com/vi/${v.youtubeId}/hqdefault.jpg`}
+                />
+                <span className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors group-hover:bg-black/35">
+                  <span className="flex size-10 items-center justify-center rounded-full bg-white/95 text-brand-navy shadow-md">
+                    <Play aria-hidden className="ml-0.5 size-5 fill-current" />
+                  </span>
+                </span>
               </a>
-              <dl className="mt-2 grid grid-cols-[repeat(auto-fill,minmax(76px,1fr))] gap-x-3 gap-y-1.5">
+            ) : (
+              <DriveVideoPreview fileId={c.driveVideo!.fileId} title={c.name} />
+            )}
+            <div className="min-w-0 flex-1">
+              <p className="line-clamp-2 text-sm font-semibold leading-snug">{v?.title || c.name}</p>
+              {v && href ? (
+                <a
+                  className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-brand-blue hover:underline"
+                  href={href}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  Assistir no YouTube <ExternalLink aria-hidden className="size-3" />
+                </a>
+              ) : (
+                <p className="mt-1 text-xs text-muted-foreground">Clique na miniatura para assistir aqui.</p>
+              )}
+              {/* 92px: cabe "VISUALIZAÇÕES" inteiro. */}
+              <dl className="mt-2 grid grid-cols-[repeat(auto-fill,minmax(92px,1fr))] gap-x-3 gap-y-1.5">
                 <Stat label="Visualizações" strong value={formatInt(c.views)} />
                 <Stat label="Impressões" value={formatCompact(c.impressions)} />
                 <Stat label="VTR" value={formatPercent(safe(c.views, c.impressions), 1)} />
                 <Stat label="Investido" value={formatCurrency(c.spend)} />
                 <Stat label="CPV" value={formatUnitCost(safe(c.spend, c.views))} />
-                <Stat label="Cliques" value={formatInt(c.clicks)} />
+                {/* Vídeos do Drive (HAWK e Connected TV): sem cliques, para caber no card. */}
+                {v ? <Stat label="Cliques" value={formatInt(c.clicks)} /> : null}
               </dl>
               {q ? (
                 <div className="mt-2 grid grid-cols-4 gap-1.5" aria-label="Retenção por quartil">

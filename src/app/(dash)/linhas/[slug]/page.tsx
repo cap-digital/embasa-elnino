@@ -203,7 +203,11 @@ function LineBody({ summary, cumulative }: { summary: LineSummary; cumulative: C
   );
   const complementaryCard = (
     <ChartCard description={`Métricas complementares da estratégia ${strategy.label}.`} minHeight={200} scroll title="Métricas complementares">
-      <ComplementaryMetrics color={color} metrics={complementary} />
+      <ComplementaryMetrics
+        clicksInsteadOfMetric={line.id === "video-hawk" || line.id === "connected-tv"}
+        color={color}
+        metrics={complementary}
+      />
     </ChartCard>
   );
   const rings =
@@ -387,6 +391,24 @@ function LineBody({ summary, cumulative }: { summary: LineSummary; cumulative: C
   }
 
   // Clássico (padrão e fallback dos demais quando faltam dados para o layout).
+  // Com vídeos (HAWK e Connected TV, via planilha), o card de vídeos entra no
+  // lugar do progresso/retenção.
+  const hasVideos = summary.creatives.some((c) => c.video || c.driveVideo);
+  if (hasVideos) {
+    return (
+      <>
+        <section className={`${rowA} lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]`}>
+          {pace}
+          {delivery}
+        </section>
+        <section className={`${rowB} md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,0.9fr)_minmax(0,1.1fr)]`}>
+          {spend}
+          {complementaryCard}
+          {videos}
+        </section>
+      </>
+    );
+  }
   return (
     <>
       <section className={`${rowA} lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]`}>

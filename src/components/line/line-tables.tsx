@@ -176,7 +176,11 @@ export function SheetDataTable({ table, color }: { table: SheetTable; color: str
     }
     return "value" as const;
   });
-  const format = (value: string | number | null, k: (typeof kind)[number]) => {
+  // Coluna % em pontos percentuais (34,71) em vez de fração (0,3471).
+  const percentPoints = table.columns.map(
+    (_, i) => kind[i] === "percent" && table.rows.some((row) => typeof row[i] === "number" && Math.abs(row[i] as number) > 1)
+  );
+  const format = (value: string | number | null, k: (typeof kind)[number], points: boolean) => {
     if (value === null || value === "") {
       return "—";
     }
@@ -184,7 +188,7 @@ export function SheetDataTable({ table, color }: { table: SheetTable; color: str
       return formatDateShort(value);
     }
     if (typeof value === "number") {
-      return k === "percent" ? formatPercent(value, 2) : formatInt(value);
+      return k === "percent" ? formatPercent(points ? value / 100 : value, 2) : formatInt(value);
     }
     return value;
   };
@@ -216,7 +220,7 @@ export function SheetDataTable({ table, color }: { table: SheetTable; color: str
                   key={table.columns[i]}
                   style={i > 0 && numeric && kind[i] !== "percent" && /impress/i.test(table.columns[i]) ? { color, fontWeight: 600 } : undefined}
                 >
-                  {format(value, kind[i])}
+                  {format(value, kind[i], percentPoints[i])}
                 </TableCell>
               );
             })}

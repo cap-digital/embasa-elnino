@@ -32,9 +32,10 @@ export const lines: ContractedLine[] = [
   {
     id: "video-hawk",
     order: 3,
-    name: "Rede de Vídeo HAWK",
-    shortName: "Vídeo HAWK",
+    name: "Rede de Vídeo",
+    shortName: "Vídeo Programático",
     channel: "Programática",
+    navHint: null,
     strategy: "visualizacoes",
     contractedMetric: 166_667,
     contractedUnitCost: 0.12,
@@ -80,7 +81,7 @@ export const lines: ContractedLine[] = [
   {
     id: "connected-tv",
     order: 7,
-    name: "Connected TV HAWK",
+    name: "Connected TV",
     shortName: "Connected TV",
     channel: "Samsung, LG, Pluto e Globoplay",
     navHint: null,

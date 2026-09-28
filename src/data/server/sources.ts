@@ -1,6 +1,7 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
+import { campaign } from "../campaign";
 import { lines } from "../lines";
 import { platformSpendToInvestment } from "../margins";
 import type { DailyRow, LineDataset, LineId } from "../types";
@@ -169,6 +170,11 @@ const loadSheets = unstable_cache(
         status: hasDelivery ? "live" : "pending",
         source: "planilha",
         rows: hasDelivery ? fillMissingDays(rows, rows[0]?.date) : [],
+        // A planilha não informa o período: do 1º dia com entrega ao fim da
+        // campanha (usado no ritmo esperado e em "faltam / necessário por dia").
+        flight: hasDelivery
+          ? { start: `${rows[0].date}T00:00:00-03:00`, end: `${campaign.endDate}T23:59:59-03:00` }
+          : undefined,
         creatives: hasDelivery ? creatives : undefined,
         sheetTable: hasDelivery ? table : undefined,
         fetchedAt,
@@ -177,7 +183,7 @@ const loadSheets = unstable_cache(
     }
     return result;
   },
-  ["planilha-datasets-v2"],
+  ["planilha-datasets-v4"],
   { revalidate: REVALIDATE_SECONDS, tags: ["planilha"] }
 );
 

@@ -31,11 +31,24 @@ const DELIVERED_COLUMNS: Record<SheetLineId, string[]> = {
 
 const COLUMNS = {
   date: ["data", "date", "dia"],
-  spend: ["investimento", "gasto", "custo", "valor"],
+  spend: ["investimento", "gasto", "custo", "valor", "realcostlocal", "realcost", "cost"],
   impressions: ["impressoes", "impressions"],
   clicks: ["cliques", "clicks"],
-  creative: ["banner", "criativo", "anuncio", "peca"],
+  creative: ["banner", "criativo", "creative", "anuncio", "peca"],
+  thumbnail: ["thumbnail", "thumb", "video", "link"],
 };
+
+/** Linhas de vídeo: o criativo vira vídeo (views = métrica contratada). */
+const VIDEO_LINES = new Set<SheetLineId>(["video-hawk", "connected-tv"]);
+
+/** ID do arquivo num link do Google Drive (/file/d/{id}/… ou ?id={id}). */
+function driveFileId(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const match = value.match(/drive\.google\.com\/(?:file\/d\/|open\?id=|uc\?(?:[^#]*&)?id=)([\w-]{10,})/);
+  return match ? match[1] : null;
+}
 
 type SheetRow = Record<string, unknown>;
 
@@ -129,10 +142,11 @@ function parseTab(lineId: SheetLineId, tab: SheetRow[]): SheetLineData {
 
     const name = pick(row, COLUMNS.creative);
     if (typeof name === "string" && name.trim()) {
-      const creative = byCreative.get(name) ?? {
+      const isVideo = VIDEO_LINES.has(lineId);
+      const creative: Creative = byCreative.get(name) ?? {
         id: `${lineId}:${normalize(name)}`,
         name: name.trim(),
-        kind: "image" as const,
+        kind: isVideo ? "video" : "image",
         impressions: 0,
         clicks: 0,
         spend: 0,
@@ -141,15 +155,23 @@ function parseTab(lineId: SheetLineId, tab: SheetRow[]): SheetLineData {
       creative.impressions += impressions;
       creative.clicks += clicks;
       creative.spend += spend;
+      if (isVideo) {
+        creative.views += delivered;
+      }
+      const fileId = driveFileId(pick(row, COLUMNS.thumbnail));
+      if (fileId && !creative.driveVideo) {
+        creative.driveVideo = { fileId };
+      }
       byCreative.set(name, creative);
     }
   }
 
   const round = (n: number) => Math.round(n * 100) / 100;
+  const days = [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
+  // A planilha traz dias zerados antes da veiculação: a série começa na 1ª entrega.
+  const firstActive = days.findIndex((r) => r.impressions > 0 || r.delivered > 0 || r.spend > 0);
   return {
-    rows: [...byDate.values()]
-      .sort((a, b) => a.date.localeCompare(b.date))
-      .map((r) => ({ ...r, spend: round(r.spend) })),
+    rows: (firstActive === -1 ? [] : days.slice(firstActive)).map((r) => ({ ...r, spend: round(r.spend) })),
     creatives: [...byCreative.values()]
       .map((c) => ({ ...c, spend: round(c.spend) }))
       .sort((a, b) => b.impressions - a.impressions),
