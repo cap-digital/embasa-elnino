@@ -158,7 +158,7 @@ export type PaceStatus = "acima" | "no-ritmo" | "abaixo";
  */
 export type LineDataStatus = "live" | "pending" | "error";
 
-export type DataSourceId = "none" | "google-ads" | "spotify-ads";
+export type DataSourceId = "none" | "google-ads" | "spotify-ads" | "planilha";
 
 /** Criativo (anúncio) com métricas do período inteiro. JSON puro. */
 export interface Creative {
@@ -193,6 +193,16 @@ export interface Keyword {
   spend: number;
 }
 
+/**
+ * Tabela crua da planilha (uma linha por criativo e dia), com as colunas
+ * originais. A coluna de investimento é removida na leitura. JSON puro.
+ */
+export interface SheetTable {
+  columns: string[];
+  /** Datas já em yyyy-mm-dd; percentuais como fração (0.0123 = 1,23%). */
+  rows: Array<Array<string | number | null>>;
+}
+
 /** Métricas extras que só existem para o período inteiro (sem série diária). */
 export interface LineExtras {
   reach?: number;
@@ -214,6 +224,8 @@ export interface LineDataset {
   creatives?: Creative[];
   /** Palavras-chave (campanhas de pesquisa), mesmo antes da primeira entrega. */
   keywords?: Keyword[];
+  /** Tabela original da planilha (linhas que vêm da planilha). */
+  sheetTable?: SheetTable;
   /** Orçamento diário da campanha na plataforma (convertido pela margem). */
   dailyBudget?: number;
   /** Nome da campanha na plataforma. */
@@ -260,6 +272,7 @@ export interface LineSummary {
   complementary: ComplementaryMetrics | null;
   creatives: Creative[];
   keywords: Keyword[];
+  sheetTable: SheetTable | null;
   dailyBudget: number | null;
   daily: DailyRow[];
 }

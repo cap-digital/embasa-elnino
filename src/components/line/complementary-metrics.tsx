@@ -17,8 +17,13 @@ export function complementaryItems(m: Metrics): Item[] {
     case "alcance":
       return [
         { label: "Impressões", value: m.impressions },
-        { label: "Alcance", value: m.reach, hint: "pessoas únicas" },
-        { label: "Frequência", value: m.frequency, format: decimalOne, hint: "impressões por pessoa" },
+        // Alcance e frequência só quando a fonte informa (a planilha do Rich Media não traz).
+        ...(m.reach > 0
+          ? [
+              { label: "Alcance", value: m.reach, hint: "pessoas únicas" },
+              { label: "Frequência", value: m.frequency, format: decimalOne, hint: "impressões por pessoa" },
+            ]
+          : []),
         { label: "CPM realizado", value: m.cpm, format: currencyCentsFormat },
         { label: "Cliques", value: m.clicks },
         { label: "CTR", value: m.ctr, format: percentTwo },

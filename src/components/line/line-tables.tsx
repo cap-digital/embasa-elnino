@@ -1,5 +1,5 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import type { LineSummary } from "@/data/types";
+import type { LineSummary, SheetTable } from "@/data/types";
 import {
   formatCurrency,
   formatCurrencyInt,
@@ -157,6 +157,69 @@ export function DailyTable({ summary }: { summary: LineSummary }) {
             ) : null}
             <TableCell className="py-1.5 text-right tabular-nums text-muted-foreground">{formatInt(row.clicks)}</TableCell>
             <TableCell className="py-1.5 text-right tabular-nums">{formatProgress(row.cumulative / line.contractedMetric)}</TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+
+/** Tabela da planilha como ela é: mesmas colunas e ordem das linhas. */
+export function SheetDataTable({ table, color }: { table: SheetTable; color: string }) {
+  const kind = table.columns.map((column) => {
+    const key = column.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    if (key === "data" || key === "date" || key === "dia") {
+      return "date" as const;
+    }
+    if (column.includes("%")) {
+      return "percent" as const;
+    }
+    return "value" as const;
+  });
+  const format = (value: string | number | null, k: (typeof kind)[number]) => {
+    if (value === null || value === "") {
+      return "—";
+    }
+    if (k === "date" && typeof value === "string") {
+      return formatDateShort(value);
+    }
+    if (typeof value === "number") {
+      return k === "percent" ? formatPercent(value, 2) : formatInt(value);
+    }
+    return value;
+  };
+
+  return (
+    <Table className="text-xs">
+      <TableHeader className="sticky top-0 z-10 bg-card">
+        <TableRow>
+          {table.columns.map((column, i) => (
+            <TableHead className={cn("h-8", i > 0 && kind[i] !== "date" && "text-right")} key={column}>
+              {column}
+            </TableHead>
+          ))}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {table.rows.map((row, r) => (
+          <TableRow key={r}>
+            {row.map((value, i) => {
+              const numeric = typeof value === "number";
+              return (
+                <TableCell
+                  className={cn(
+                    "py-1.5",
+                    i === 0 && "font-medium",
+                    numeric && "text-right tabular-nums",
+                    numeric && kind[i] === "percent" && "text-muted-foreground"
+                  )}
+                  key={table.columns[i]}
+                  style={i > 0 && numeric && kind[i] !== "percent" && /impress/i.test(table.columns[i]) ? { color, fontWeight: 600 } : undefined}
+                >
+                  {format(value, kind[i])}
+                </TableCell>
+              );
+            })}
           </TableRow>
         ))}
       </TableBody>

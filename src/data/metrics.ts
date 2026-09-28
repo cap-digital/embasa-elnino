@@ -243,6 +243,7 @@ export function getLineSummary(lineId: LineId, datasets: Datasets): LineSummary 
     creatives: hasData ? (dataset.creatives ?? []) : [],
     // Palavras-chave aparecem mesmo antes da primeira entrega.
     keywords: dataset.keywords ?? [],
+    sheetTable: hasData ? (dataset.sheetTable ?? null) : null,
     dailyBudget: dataset.dailyBudget ?? null,
     daily: rows,
   };
@@ -382,9 +383,11 @@ export function lineCumulative(lineId: LineId, datasets: Datasets) {
   const rows = dataset.status === "live" ? dataset.rows : [];
   let cumDelivered = 0;
   let cumSpend = 0;
+  let cumClicks = 0;
   return rows.map((row) => {
     cumDelivered += row.delivered;
     cumSpend += row.spend;
+    cumClicks += row.clicks;
     const endOfDay = Date.parse(`${row.date}T23:59:59-03:00`);
     return {
       date: new Date(`${row.date}T12:00:00Z`),
@@ -393,6 +396,9 @@ export function lineCumulative(lineId: LineId, datasets: Datasets) {
       gasto: Math.min(Math.round(cumSpend * 100) / 100, line.investment),
       diario: row.delivered,
       gastoDia: row.spend,
+      cliquesDia: row.clicks,
+      cliques: cumClicks,
+      impressoesDia: row.impressions,
     };
   });
 }

@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 const sourceLabel: Record<DataSourceId, string> = {
   "google-ads": "Google Ads",
   "spotify-ads": "Spotify Ads",
+  planilha: "Planilha",
   none: "Sem integração",
 };
 
@@ -36,7 +37,7 @@ export function SourceBadge({
   return (
     <span
       className={cn("inline-flex items-center gap-1 rounded-full bg-status-good px-2 py-0.5 text-[11px] font-semibold text-status-good-foreground", className)}
-      title="Dados reais da API da plataforma, atualizados a cada hora"
+      title={source === "planilha" ? "Dados reais da planilha de mídia, atualizados a cada hora" : "Dados reais da API da plataforma, atualizados a cada hora"}
     >
       <Database aria-hidden className="size-3" />
       {sourceLabel[source]}

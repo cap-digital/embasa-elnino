@@ -8,6 +8,7 @@ import { BarYAxis } from "@/components/charts/bar-y-axis";
 import { ComposedChart } from "@/components/charts/composed-chart";
 import { Line } from "@/components/charts/line";
 import { SeriesBar } from "@/components/charts/series-bar";
+import { BarValueLabels, ValueLabels } from "@/components/charts/value-labels";
 import { XAxis } from "@/components/charts/x-axis";
 import { YAxis } from "@/components/charts/y-axis";
 import type { DailyRow } from "@/data/types";
@@ -40,6 +41,7 @@ export function KeywordThemesChart({
     >
       <Grid horizontal={false} strokeDasharray="0" vertical />
       <Bar dataKey="palavras" fill={color} lineCap={4} />
+      <BarValueLabels format={formatInt} valueKey="palavras" />
       <BarYAxis showAllLabels />
       <ChartTooltip
         rows={(p) => [
@@ -159,6 +161,7 @@ export function SearchDailyCombo({
       >
         <Grid horizontal strokeDasharray="0" />
         <SeriesBar dataKey="cliques" fill={color} radius={4} />
+        <ValueLabels format={formatInt} mode="bar" valueKey="cliques" />
         <Line curve={curveMonotoneX} dataKey="ctr" fadeEdges={false} showMarkers stroke="var(--brand-cyan)" strokeWidth={2.5} yAxisId="ctr" />
         <Line curve={curveMonotoneX} dataKey="cpc" fadeEdges={false} showMarkers stroke="var(--brand-orange)" strokeWidth={2.5} yAxisId="cpc" />
         {contractedCpc ? (

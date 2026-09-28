@@ -6,6 +6,7 @@ import { platformSpendToInvestment } from "../margins";
 import type { DailyRow, LineDataset, LineId } from "../types";
 import { todayInBahia } from "./env";
 import { fetchGoogleCampaigns, fetchGoogleCreatives, fetchGoogleKeywords, toDailyRows } from "./google-ads";
+import { fetchSheetLines, SHEET_TABS, type SheetLineId } from "./sheets";
 import { fetchSpotifyCampaign } from "./spotify-ads";
 
 /**
@@ -13,7 +14,8 @@ import { fetchSpotifyCampaign } from "./spotify-ads";
  * - Google Ads: Display, Shorts, In-Stream (por ID) e Pesquisa (por nome,
  *   enquanto a campanha não existir na API a linha fica "pendente").
  * - Spotify Ads: Spotify.
- * - Demais linhas: "ainda sem dados" até ganharem integração (sem mock).
+ * - Planilha (Apps Script): Rich Media, Vídeo HAWK, Connected TV, Taboola e
+ *   WhatsApp; aba vazia = linha "pendente".
  */
 const GOOGLE_LINES = {
   "rede-display": { campaignId: "24281086224", delivered: "impressions" },
@@ -152,6 +154,33 @@ const loadSpotify = unstable_cache(
   { revalidate: REVALIDATE_SECONDS, tags: ["spotify-ads"] }
 );
 
+/* -------------------------------- Planilha -------------------------------- */
+
+const loadSheets = unstable_cache(
+  async (): Promise<Record<SheetLineId, LineDataset>> => {
+    const data = await fetchSheetLines();
+    const fetchedAt = new Date().toISOString();
+    const result = {} as Record<SheetLineId, LineDataset>;
+    for (const lineId of Object.keys(SHEET_TABS) as SheetLineId[]) {
+      const { rows, creatives, table } = data[lineId];
+      const hasDelivery = rows.some((r) => r.impressions > 0 || r.delivered > 0 || r.spend > 0);
+      result[lineId] = {
+        lineId,
+        status: hasDelivery ? "live" : "pending",
+        source: "planilha",
+        rows: hasDelivery ? fillMissingDays(rows, rows[0]?.date) : [],
+        creatives: hasDelivery ? creatives : undefined,
+        sheetTable: hasDelivery ? table : undefined,
+        fetchedAt,
+        message: hasDelivery ? undefined : NO_DATA_MESSAGE,
+      };
+    }
+    return result;
+  },
+  ["planilha-datasets-v2"],
+  { revalidate: REVALIDATE_SECONDS, tags: ["planilha"] }
+);
+
 /* -------------------------------- Agregado -------------------------------- */
 
 function errorDataset(lineId: LineId, source: LineDataset["source"], error: unknown): LineDataset {
@@ -194,7 +223,7 @@ function applyMargin(dataset: LineDataset): LineDataset {
 
 /** Datasets de todas as linhas. Deduplicado por request; APIs com cache de 1h. */
 export const getLineDatasets = cache(async (): Promise<Record<LineId, LineDataset>> => {
-  const [google, spotify] = await Promise.allSettled([loadGoogle(), loadSpotify()]);
+  const [google, spotify, sheets] = await Promise.allSettled([loadGoogle(), loadSpotify(), loadSheets()]);
 
   const datasets = {} as Record<LineId, LineDataset>;
   for (const line of lines) {
@@ -206,6 +235,11 @@ export const getLineDatasets = cache(async (): Promise<Record<LineId, LineDatase
         google.status === "fulfilled"
           ? google.value[line.id as GoogleLineId]
           : errorDataset(line.id, "google-ads", google.reason);
+    } else if (line.id in SHEET_TABS) {
+      datasets[line.id] =
+        sheets.status === "fulfilled"
+          ? sheets.value[line.id as SheetLineId]
+          : errorDataset(line.id, "planilha", sheets.reason);
     } else {
       datasets[line.id] = {
         lineId: line.id,

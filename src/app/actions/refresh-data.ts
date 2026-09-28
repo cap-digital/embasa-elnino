@@ -11,7 +11,7 @@ export type RefreshResult =
   | { ok: false; retryInSeconds: number };
 
 /**
- * Força a busca de dados novos no Google Ads e no Spotify Ads:
+ * Força a busca de dados novos no Google Ads, no Spotify Ads e na planilha:
  * expira o cache (a próxima leitura espera o dado novo) e revalida as páginas.
  */
 export async function refreshPlatformData(): Promise<RefreshResult> {
@@ -24,6 +24,7 @@ export async function refreshPlatformData(): Promise<RefreshResult> {
 
   updateTag("google-ads");
   updateTag("spotify-ads");
+  updateTag("planilha");
   revalidatePath("/", "layout");
   // As rotas de API têm cache de resposta próprio.
   revalidatePath("/api/google-ads");

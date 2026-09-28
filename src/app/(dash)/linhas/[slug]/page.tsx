@@ -18,6 +18,7 @@ import { UnitCostCompare } from "@/components/campaign/unit-cost-compare";
 import { ChartCard } from "@/components/dashboard/chart-card";
 import { ComplementaryMetrics } from "@/components/line/complementary-metrics";
 import {
+  DailyClicksChart,
   DailyDeliveryChart,
   DailySpendChart,
   PaceChart,
@@ -28,7 +29,7 @@ import { CreativeGallery, VideoList } from "@/components/line/creatives";
 import { DeliveryHeatmap } from "@/components/line/delivery-heatmap";
 import { KeywordTable } from "@/components/line/keyword-table";
 import { StageFunnel } from "@/components/line/funnel-card";
-import { ContractTable, DailyTable } from "@/components/line/line-tables";
+import { ContractTable, DailyTable, SheetDataTable } from "@/components/line/line-tables";
 import { LineTitleBar } from "@/components/line/line-title-bar";
 import { VideoRates } from "@/components/line/video-rates";
 import { currencyCentsFormat, currencyFormat } from "@/components/motion/count-up";
@@ -171,6 +172,9 @@ function LineBody({ summary, cumulative }: { summary: LineSummary; cumulative: C
   const { line, strategy } = summary;
   const complementary = summary.complementary!;
   const color = line.color;
+  // Rich Media: investimento diário fixo na planilha — cliques no lugar do gasto
+  // diário, tabela da planilha no lugar do progresso e sem métricas complementares.
+  const isRichMedia = line.id === "rich-media";
   const rowA = "grid gap-3 fit:min-h-0";
   const rowB = "grid gap-3 fit:min-h-0";
 
@@ -188,7 +192,11 @@ function LineBody({ summary, cumulative }: { summary: LineSummary; cumulative: C
       <DailyDeliveryChart color={color} data={cumulative} metricLabel={strategy.metricLabel} />
     </ChartCard>
   );
-  const spend = (
+  const spend = isRichMedia ? (
+    <ChartCard description="Cliques por dia; no tooltip, o acumulado e o CTR do dia." minHeight={280} title="Evolução diária dos cliques">
+      <DailyClicksChart color={color} data={cumulative} />
+    </ChartCard>
+  ) : (
     <ChartCard description="Gasto por dia; no tooltip, o acumulado travado no contratado." minHeight={280} title="Evolução diária do investimento">
       <DailySpendChart color={color} data={cumulative} />
     </ChartCard>
@@ -198,16 +206,34 @@ function LineBody({ summary, cumulative }: { summary: LineSummary; cumulative: C
       <ComplementaryMetrics color={color} metrics={complementary} />
     </ChartCard>
   );
-  const rings = (
-    <ChartCard description="Entrega, ritmo esperado e investimento (travado)." minHeight={260} title="Progresso">
-      <PaceRings
-        color={color}
-        expectedProgress={summary.expectedProgress}
-        investmentProgress={summary.investmentProgress}
-        metricProgress={summary.metricProgress}
-      />
-    </ChartCard>
-  );
+  const rings =
+    isRichMedia && summary.sheetTable ? (
+      <ChartCard
+        description="Dados da planilha por banner e dia."
+        flush
+        minHeight={260}
+        scroll
+        title="Detalhamento por banner"
+      >
+        <div className="px-3 pb-2">
+          <SheetDataTable color={color} table={summary.sheetTable} />
+        </div>
+      </ChartCard>
+    ) : (
+      <ChartCard
+        description={`% da meta de ${strategy.metricLabel}: entregue vs. esperado até hoje; e investimento (travado).`}
+        minHeight={260}
+        title="Progresso"
+      >
+        <PaceRings
+          color={color}
+          expectedProgress={summary.expectedProgress}
+          investmentProgress={summary.investmentProgress}
+          metricLabel={strategy.metricLabel}
+          metricProgress={summary.metricProgress}
+        />
+      </ChartCard>
+    );
   const retention =
     complementary.strategy === "visualizacoes" && complementary.quartiles.q25 > 0 ? (
       <ChartCard description="Impressões que chegaram a cada quartil do vídeo." minHeight={240} title="Retenção por quartil">
@@ -330,10 +356,12 @@ function LineBody({ summary, cumulative }: { summary: LineSummary; cumulative: C
           </ChartCard>
           {rings}
         </section>
-        <section className={`${rowB} md:grid-cols-2 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.9fr)]`}>
+        <section
+          className={`${rowB} md:grid-cols-2 ${isRichMedia ? "" : "xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,0.9fr)]"}`}
+        >
           {delivery}
           {spend}
-          {complementaryCard}
+          {isRichMedia ? null : complementaryCard}
         </section>
       </>
     );
@@ -365,9 +393,11 @@ function LineBody({ summary, cumulative }: { summary: LineSummary; cumulative: C
         {pace}
         {delivery}
       </section>
-      <section className={`${rowB} md:grid-cols-2 xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.8fr)]`}>
+      <section
+        className={`${rowB} md:grid-cols-2 ${isRichMedia ? "xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]" : "xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,0.8fr)]"}`}
+      >
         {spend}
-        {complementaryCard}
+        {isRichMedia ? null : complementaryCard}
         {retention}
       </section>
     </>

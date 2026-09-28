@@ -32,14 +32,16 @@ const DateTickerInner = memo(function DateTickerInner({
   currentIndex,
   labels,
 }: Omit<DateTickerProps, "visible">) {
-  // Parse labels into month and day parts
-  const parsedLabels = useMemo(() => {
-    return labels.map((label, index) => {
+  // Separa dia e mês. Aceita "Sep 27" (mês primeiro) e "27 de set" (pt-BR, dia primeiro).
+  const { parsedLabels, dayFirst } = useMemo(() => {
+    const dayFirst = /^\d/.test(labels[0] ?? "");
+    const parsed = labels.map((label, index) => {
       const parts = label.split(" ");
-      const month = parts[0] || "";
-      const day = parts[1] || "";
+      const day = (dayFirst ? parts[0] : parts.at(-1)) ?? "";
+      const month = (dayFirst ? parts.slice(1) : parts.slice(0, -1)).join(" ");
       return { month, day, full: label, key: `${label}::${index}` };
     });
+    return { parsedLabels: parsed, dayFirst };
   }, [labels]);
 
   // Month segments: one entry per consecutive run (Jan → Feb → …), keyed by start index
@@ -95,7 +97,7 @@ const DateTickerInner = memo(function DateTickerInner({
   return (
     <div className="overflow-hidden rounded-full bg-zinc-900 px-4 py-1 text-white shadow-lg dark:bg-zinc-100 dark:text-zinc-900">
       <div className="relative h-6 overflow-hidden">
-        <div className="flex items-center justify-center gap-1">
+        <div className={`flex items-center justify-center gap-1 ${dayFirst ? "flex-row-reverse" : ""}`}>
           {/* Month stack */}
           <div className="relative h-6 overflow-hidden">
             <motion.div className="flex flex-col" style={{ y: monthY }}>
