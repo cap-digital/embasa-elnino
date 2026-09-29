@@ -11,7 +11,7 @@ import type { LineId } from "./types";
  * Use fração decimal: 0.20 = 20%.
  *
  * `spendIncludesMargin: true` = a fonte já entrega o valor final com a margem
- * embutida (ex.: Rich Media na planilha); nesse caso o valor é usado como está.
+ * embutida (ex.: Rich Media e WhatsApp na planilha); nesse caso o valor é usado como está.
  */
 export const PLATFORM_MARGINS: Record<
   LineId,
@@ -25,7 +25,7 @@ export const PLATFORM_MARGINS: Record<
   "youtube-shorts": { label: "YT - SHORTS", margin: 0.2 },
   "youtube-instream": { label: "YT - IN STREAM", margin: 0.1280 },
   "rich-media": { label: "RICH MEDIA", margin: 0.2, spendIncludesMargin: true },
-  whatsapp: { label: "WHATSAPP - DISPARO", margin: 0.2 },
+  whatsapp: { label: "WHATSAPP - DISPARO", margin: 0.2, spendIncludesMargin: true },
   "rede-pesquisa": { label: "REDE DE PESQUISA", margin: 0.2 },
 };
 

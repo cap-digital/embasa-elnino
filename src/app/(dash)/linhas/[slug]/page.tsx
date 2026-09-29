@@ -7,6 +7,7 @@ import {
   MousePointerClick,
   Percent,
   Radio,
+  Send,
   Target,
   Wallet,
 } from "lucide-react";
@@ -29,6 +30,7 @@ import { CreativeGallery, VideoList } from "@/components/line/creatives";
 import { DeliveryHeatmap } from "@/components/line/delivery-heatmap";
 import { KeywordTable } from "@/components/line/keyword-table";
 import { StageFunnel } from "@/components/line/funnel-card";
+import { DispatchDetails, DispatchResult } from "@/components/line/dispatch";
 import { ContractTable, DailyTable, SheetDataTable } from "@/components/line/line-tables";
 import { LineTitleBar } from "@/components/line/line-title-bar";
 import { VideoRates } from "@/components/line/video-rates";
@@ -43,6 +45,7 @@ import {
   formatDayMonthBahia,
   formatDeltaPp,
   formatInt,
+  formatPercent,
   formatProgress,
   formatUnitCost,
 } from "@/lib/format";
@@ -86,12 +89,21 @@ export default async function LinePage(props: PageProps<"/linhas/[slug]">) {
   const { line, strategy } = summary;
   const hasCost =
     strategy.unitCostLabel && summary.realizedUnitCost !== null && line.contractedUnitCost !== null;
+  // WhatsApp: disparo único — sem ritmo diário; o 4º KPI vira mensagens processadas.
+  const dispatch = summary.complementary?.strategy === "disparos" ? summary.complementary : null;
+  const dispatchDays = summary.daily.filter((r) => r.delivered > 0 || r.impressions > 0).length;
   const expectedHint = summary.flight
     ? `esperado ${formatProgress(summary.expectedProgress)} · veiculação de ${formatDayMonthBahia(summary.flight.start)} a ${formatDayMonthBahia(summary.flight.end)}`
     : `esperado ${formatProgress(summary.expectedProgress)} · ${formatDeltaPp(summary.paceDelta)}`;
 
   return (
-    <div className="mx-auto flex w-full max-w-[1800px] flex-col gap-3 p-3 sm:p-4 fit:grid fit:h-full fit:grid-rows-[auto_auto_minmax(0,1fr)_minmax(0,1fr)]">
+    <div
+      className={`mx-auto flex w-full max-w-[1800px] flex-col gap-3 p-3 sm:p-4 fit:grid fit:h-full ${
+        dispatch && dispatchDays < 2
+          ? "fit:content-start fit:grid-rows-[auto_auto_auto]"
+          : "fit:grid-rows-[auto_auto_minmax(0,1fr)_minmax(0,1fr)]"
+      }`}
+    >
       <LineTitleBar next={next} prev={prev} summary={summary} />
 
       {/* KPIs da linha */}
@@ -150,14 +162,24 @@ export default async function LinePage(props: PageProps<"/linhas/[slug]">) {
             </>
           )}
         </Reveal>
-        <KpiCard
-          accent="var(--brand-cyan)"
-          format={{ style: "percent", maximumFractionDigits: 0 }}
-          hint={expectedHint}
-          icon={Gauge}
-          label="Ritmo"
-          value={summary.metricProgress}
-        />
+        {dispatch ? (
+          <KpiCard
+            accent="var(--brand-cyan)"
+            hint={`mensagens pela API · ${formatPercent(dispatch.deliveryRate, 1)} entregues`}
+            icon={Send}
+            label="Processadas"
+            value={dispatch.sent}
+          />
+        ) : (
+          <KpiCard
+            accent="var(--brand-cyan)"
+            format={{ style: "percent", maximumFractionDigits: 0 }}
+            hint={expectedHint}
+            icon={Gauge}
+            label="Ritmo"
+            value={summary.metricProgress}
+          />
+        )}
       </section>
 
       <LineBody cumulative={cumulative} summary={summary} />
@@ -265,6 +287,32 @@ function LineBody({ summary, cumulative }: { summary: LineSummary; cumulative: C
       <VideoList color={color} creatives={summary.creatives} />
     </ChartCard>
   );
+
+  // WhatsApp: resultado do disparo + detalhes da planilha. Ritmo e tabela diária
+  // só com mais de um dia de disparo (com um dia, repetiriam os KPIs).
+  if (complementary.strategy === "disparos") {
+    const days = summary.daily.filter((r) => r.delivered > 0 || r.impressions > 0).length;
+    return (
+      <>
+        <section className={`${rowA} lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]`}>
+          <ChartCard description="Mensagens processadas pela API: entregues com sucesso e não entregues." minHeight={110} title="Resultado do disparo">
+            <DispatchResult color={color} metrics={complementary} />
+          </ChartCard>
+          {summary.sheetTable ? (
+            <ChartCard description="Informações do disparo na planilha." minHeight={110} title="Detalhes">
+              <DispatchDetails table={summary.sheetTable} />
+            </ChartCard>
+          ) : null}
+        </section>
+        {days >= 2 ? (
+          <section className={`${rowB} lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]`}>
+            {pace}
+            {dailyTable}
+          </section>
+        ) : null}
+      </>
+    );
+  }
 
   // Display: detalhamento diário + ritmo; criativos estáticos + complementares.
   if (layout === "display") {

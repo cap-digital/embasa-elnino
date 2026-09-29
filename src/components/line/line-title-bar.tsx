@@ -1,6 +1,6 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import Link from "next/link";
-import { DoneBadge, GoalBadge, PaceBadge } from "@/components/campaign/pace-badge";
+import { GoalBadge, PaceBadge } from "@/components/campaign/pace-badge";
 import type { ContractedLine, LineSummary } from "@/data/types";
 
 export function LineTitleBar({
@@ -24,11 +24,12 @@ export function LineTitleBar({
         </span>
         <h1 className="font-heading text-xl font-black tracking-tight sm:text-2xl">{line.name}</h1>
         <span className="text-xs text-muted-foreground">
-          {line.channel} · estratégia {strategy.label}
+          {/* WhatsApp: canal e estratégia são ambos "Disparos" — não repete. */}
+          {line.channel !== strategy.label ? `${line.channel} · ` : ""}estratégia {strategy.label}
         </span>
-        {summary.hasData ? <PaceBadge status={summary.paceStatus} /> : null}
+        {/* Meta batida dispensa o ritmo; "investimento concluído" já aparece no KPI de investido. */}
+        {summary.hasData && !summary.goalReached ? <PaceBadge status={summary.paceStatus} /> : null}
         {summary.hasData && summary.goalReached ? <GoalBadge /> : null}
-        {summary.investmentComplete ? <DoneBadge /> : null}
       </div>
       <nav aria-label="Navegação entre plataformas" className="flex items-center gap-1 text-xs">
         {prev ? (

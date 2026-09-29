@@ -183,7 +183,7 @@ const loadSheets = unstable_cache(
     }
     return result;
   },
-  ["planilha-datasets-v4"],
+  ["planilha-datasets-v5"],
   { revalidate: REVALIDATE_SECONDS, tags: ["planilha"] }
 );
 

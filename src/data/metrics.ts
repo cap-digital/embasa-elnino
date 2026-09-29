@@ -184,15 +184,16 @@ function complementaryFor(
       };
     }
     case "disparos":
-      // Entregas e leituras dependem da integração do WhatsApp (ainda sem API).
+      // Planilha: enviadas = processadas pela API (em `impressions`), entregues =
+      // sucesso de entrega (métrica contratada). Leituras ainda não informadas.
       return {
         strategy: "disparos",
-        sent: delivered,
-        delivered: 0,
-        deliveryRate: 0,
+        sent: impressions,
+        delivered,
+        deliveryRate: safeDiv(delivered, impressions),
         readRate: 0,
         clicks,
-        ctr: 0,
+        ctr: safeDiv(clicks, delivered),
       };
   }
 }
@@ -292,7 +293,8 @@ export function getCampaignSummary(datasets: Datasets): CampaignSummary {
         totals.clicks += c.clicks;
         break;
       case "disparos":
-        totals.sent += c.sent;
+        // Disparos entregues (a métrica contratada).
+        totals.sent += c.delivered;
         totals.clicks += c.clicks;
         break;
     }

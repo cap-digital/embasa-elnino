@@ -64,9 +64,16 @@ export function complementaryItems(m: Metrics, clicksInsteadOfMetric = false): I
         { label: "Disparos enviados", value: m.sent },
         { label: "Entregues", value: m.delivered },
         { label: "Taxa de entrega", value: m.deliveryRate, format: percentOneDigitFormat },
-        { label: "Taxa de leitura", value: m.readRate, format: percentOneDigitFormat, hint: "sobre entregues" },
-        { label: "Cliques", value: m.clicks },
-        { label: "CTR", value: m.ctr, format: percentOneDigitFormat, hint: "cliques ÷ entregues" },
+        // Leitura e cliques só quando a fonte informar (a planilha ainda não traz).
+        ...(m.readRate > 0
+          ? [{ label: "Taxa de leitura", value: m.readRate, format: percentOneDigitFormat, hint: "sobre entregues" }]
+          : []),
+        ...(m.clicks > 0
+          ? [
+              { label: "Cliques", value: m.clicks },
+              { label: "CTR", value: m.ctr, format: percentOneDigitFormat, hint: "cliques ÷ entregues" },
+            ]
+          : []),
       ];
   }
 }

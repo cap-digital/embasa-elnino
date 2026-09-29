@@ -26,13 +26,15 @@ const DELIVERED_COLUMNS: Record<SheetLineId, string[]> = {
   "native-taboola": ["cliques", "clicks"],
   "video-hawk": ["visualizacoes", "views", "videoviews", "completes", "visualizacoescompletas"],
   "connected-tv": ["visualizacoes", "views", "videoviews", "completes", "visualizacoescompletas"],
-  whatsapp: ["disparos", "enviados", "envios"],
+  // Meta de disparos = mensagens entregues com sucesso.
+  whatsapp: ["sucessodeentrega", "entregues", "entregas", "disparos"],
 };
 
 const COLUMNS = {
   date: ["data", "date", "dia"],
   spend: ["investimento", "gasto", "custo", "valor", "realcostlocal", "realcost", "cost"],
-  impressions: ["impressoes", "impressions"],
+  // WhatsApp: mensagens processadas (enviadas) ficam no lugar das impressões.
+  impressions: ["impressoes", "impressions", "processadaspelaapi", "processadas", "enviadas", "enviados"],
   clicks: ["cliques", "clicks"],
   creative: ["banner", "criativo", "creative", "anuncio", "peca"],
   thumbnail: ["thumbnail", "thumb", "video", "link"],

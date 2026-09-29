@@ -77,7 +77,7 @@ export default async function OverviewPage() {
         <KpiCard accent="var(--strategy-visualizacoes)" hint="linhas de vídeo" icon={PlayCircle} label="Visualizações" empty={!strategyHasData("visualizacoes")} value={summary.totals.views} />
         <KpiCard accent="var(--strategy-trafego)" hint="todas as linhas" icon={MousePointerClick} label="Cliques" value={summary.totals.clicks} />
         <KpiCard accent="var(--strategy-escutas)" hint="Spotify" icon={Headphones} label="Escutas" empty={!strategyHasData("escutas")} value={summary.totals.listens} />
-        <KpiCard accent="var(--strategy-disparos)" hint="WhatsApp" icon={MessageSquare} label="Disparos" empty={!strategyHasData("disparos")} value={summary.totals.sent} />
+        <KpiCard accent="var(--strategy-disparos)" hint="WhatsApp · entregues" icon={MessageSquare} label="Disparos" empty={!strategyHasData("disparos")} value={summary.totals.sent} />
       </section>
 
       {/* Evolução + progresso por linha */}
