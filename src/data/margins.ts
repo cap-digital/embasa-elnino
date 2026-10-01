@@ -18,7 +18,6 @@ export const PLATFORM_MARGINS: Record<
   { label: string; margin: number; spendIncludesMargin?: boolean }
 > = {
   "video-hawk": { label: "REDE DE VIDEO - HAWK", margin: 0.2720 },
-  "native-taboola": { label: "NATIVE ADS - TABOOLA", margin: 0.2 },
   spotify: { label: "ESCUTAS/STREAMING (100% VISUALIZ.)", margin: 0.1280 },
   "connected-tv": { label: "CONNECTED TV - HAWK", margin: 0.2 },
   "rede-display": { label: "REDE DE DISPLAY", margin: 0.1280 },

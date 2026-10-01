@@ -17,7 +17,7 @@ import { InvestmentTimeline } from "@/components/dashboard/investment-timeline";
 import { StrategyDistributionChart } from "@/components/dashboard/strategy-distribution-chart";
 import { currencyFormat } from "@/components/motion/count-up";
 import { Reveal } from "@/components/motion/reveal";
-import { campaign, getCampaignSummary, investmentByStrategy, investmentTimeline } from "@/data";
+import { campaign, getCampaignSummary, investmentByStrategy, investmentTimeline, lines } from "@/data";
 import { getLineDatasets } from "@/data/server";
 import { formatCurrencyInt, formatProgress } from "@/lib/format";
 
@@ -108,7 +108,7 @@ export default async function OverviewPage() {
           flush
           minHeight={420}
           scroll
-          title="Progresso das 10 linhas"
+          title={`Progresso das ${lines.length} linhas`}
         >
           <ul className="flex flex-col divide-y divide-border px-1 pb-1">
             {summary.lines.map((s) => (

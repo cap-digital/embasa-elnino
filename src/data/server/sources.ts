@@ -15,8 +15,8 @@ import { fetchSpotifyCampaign } from "./spotify-ads";
  * - Google Ads: Display, Shorts, In-Stream (por ID) e Pesquisa (por nome,
  *   enquanto a campanha não existir na API a linha fica "pendente").
  * - Spotify Ads: Spotify.
- * - Planilha (Apps Script): Rich Media, Vídeo HAWK, Connected TV, Taboola e
- *   WhatsApp; aba vazia = linha "pendente".
+ * - Planilha (Apps Script): Rich Media, Vídeo HAWK, Connected TV e WhatsApp;
+ *   aba vazia = linha "pendente".
  */
 const GOOGLE_LINES = {
   "rede-display": { campaignId: "24281086224", delivered: "impressions" },

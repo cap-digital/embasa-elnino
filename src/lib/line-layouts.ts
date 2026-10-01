@@ -7,7 +7,7 @@ import type { LineId, LineSummary } from "@/data/types";
  * - heatmap: série diária longa (várias semanas);
  * - funil: etapas reais (áudio, quartis de vídeo, disparos).
  */
-export type LineLayout = "classico" | "funil" | "heatmap" | "tabela" | "display" | "shorts" | "instream" | "pesquisa";
+export type LineLayout = "classico" | "funil" | "heatmap" | "display" | "shorts" | "instream" | "pesquisa";
 
 export const LINE_LAYOUT: Record<LineId, LineLayout> = {
   "rich-media": "heatmap",
@@ -17,7 +17,6 @@ export const LINE_LAYOUT: Record<LineId, LineLayout> = {
   "youtube-shorts": "shorts",
   "youtube-instream": "instream",
   "connected-tv": "heatmap",
-  "native-taboola": "tabela",
   spotify: "funil",
   whatsapp: "funil",
 };

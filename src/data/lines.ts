@@ -1,7 +1,8 @@
 import type { ContractedLine, LineId } from "./types";
 
 /**
- * As 10 linhas contratadas. Cada linha tem uma cor fixa (variável CSS definida
+ * As 9 linhas contratadas (Native Ads Taboola saiu do plano; a verba foi para
+ * YouTube Shorts e In-Stream). Cada linha tem uma cor fixa (variável CSS definida
  * em globals.css) usada em todos os gráficos e páginas.
  */
 export const lines: ContractedLine[] = [
@@ -61,9 +62,10 @@ export const lines: ContractedLine[] = [
     shortName: "Shorts",
     channel: "YouTube",
     strategy: "visualizacoes",
-    contractedMetric: 111_111,
+    // Recebeu metade da verba do Taboola (removido do plano): R$ 20 mil → R$ 25 mil.
+    contractedMetric: 138_889,
     contractedUnitCost: 0.18,
-    investment: 20_000,
+    investment: 25_000,
     color: "var(--line-youtube-shorts)",
   },
   {
@@ -73,9 +75,10 @@ export const lines: ContractedLine[] = [
     shortName: "In-Stream",
     channel: "TrueView",
     strategy: "visualizacoes",
-    contractedMetric: 178_571,
+    // Recebeu metade da verba do Taboola (removido do plano): R$ 25 mil → R$ 30 mil.
+    contractedMetric: 214_286,
     contractedUnitCost: 0.14,
-    investment: 25_000,
+    investment: 30_000,
     color: "var(--line-youtube-instream)",
   },
   {
@@ -92,20 +95,8 @@ export const lines: ContractedLine[] = [
     color: "var(--line-connected-tv)",
   },
   {
-    id: "native-taboola",
-    order: 8,
-    name: "Native Ads Taboola",
-    shortName: "Taboola",
-    channel: "Native Ads",
-    strategy: "trafego",
-    contractedMetric: 3_125,
-    contractedUnitCost: 3.2,
-    investment: 10_000,
-    color: "var(--line-native-taboola)",
-  },
-  {
     id: "spotify",
-    order: 9,
+    order: 8,
     name: "Spotify",
     shortName: "Spotify",
     channel: "Áudio + Banner",
@@ -117,7 +108,7 @@ export const lines: ContractedLine[] = [
   },
   {
     id: "whatsapp",
-    order: 10,
+    order: 9,
     name: "WhatsApp",
     shortName: "WhatsApp",
     channel: "Disparos",

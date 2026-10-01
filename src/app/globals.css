@@ -41,14 +41,12 @@
   --color-line-youtube-shorts: var(--line-youtube-shorts);
   --color-line-youtube-instream: var(--line-youtube-instream);
   --color-line-connected-tv: var(--line-connected-tv);
-  --color-line-native-taboola: var(--line-native-taboola);
   --color-line-spotify: var(--line-spotify);
   --color-line-whatsapp: var(--line-whatsapp);
   --color-chart-6: var(--chart-6);
   --color-chart-7: var(--chart-7);
   --color-chart-8: var(--chart-8);
   --color-chart-9: var(--chart-9);
-  --color-chart-10: var(--chart-10);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -151,7 +149,6 @@
   --line-youtube-shorts: #6b4fd8;
   --line-youtube-instream: #b98600;
   --line-connected-tv: #3548a8;
-  --line-native-taboola: #7a2e6b;
   --line-spotify: #3fa060;
   --line-whatsapp: #a9451c;
 
@@ -163,9 +160,8 @@
   --chart-5: var(--line-youtube-shorts);
   --chart-6: var(--line-youtube-instream);
   --chart-7: var(--line-connected-tv);
-  --chart-8: var(--line-native-taboola);
-  --chart-9: var(--line-spotify);
-  --chart-10: var(--line-whatsapp);
+  --chart-8: var(--line-spotify);
+  --chart-9: var(--line-whatsapp);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --secondary: oklch(0.97 0 0);
@@ -251,7 +247,6 @@
   --line-youtube-shorts: #8b7af0;
   --line-youtube-instream: #b88a00;
   --line-connected-tv: #6b7ce0;
-  --line-native-taboola: #b85aa6;
   --line-spotify: #3ea866;
   --line-whatsapp: #ad4e22;
 
@@ -262,9 +257,8 @@
   --chart-5: var(--line-youtube-shorts);
   --chart-6: var(--line-youtube-instream);
   --chart-7: var(--line-connected-tv);
-  --chart-8: var(--line-native-taboola);
-  --chart-9: var(--line-spotify);
-  --chart-10: var(--line-whatsapp);
+  --chart-8: var(--line-spotify);
+  --chart-9: var(--line-whatsapp);
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);

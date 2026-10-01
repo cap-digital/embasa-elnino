@@ -31,7 +31,7 @@ import { DeliveryHeatmap } from "@/components/line/delivery-heatmap";
 import { KeywordTable } from "@/components/line/keyword-table";
 import { StageFunnel } from "@/components/line/funnel-card";
 import { DispatchDetails, DispatchResult } from "@/components/line/dispatch";
-import { ContractTable, DailyTable, SheetDataTable } from "@/components/line/line-tables";
+import { DailyTable, SheetDataTable } from "@/components/line/line-tables";
 import { LineTitleBar } from "@/components/line/line-title-bar";
 import { VideoRates } from "@/components/line/video-rates";
 import { currencyCentsFormat, currencyFormat } from "@/components/motion/count-up";
@@ -414,25 +414,6 @@ function LineBody({ summary, cumulative }: { summary: LineSummary; cumulative: C
           {delivery}
           {spend}
           {isRichMedia ? null : complementaryCard}
-        </section>
-      </>
-    );
-  }
-
-  if (layout === "tabela") {
-    return (
-      <>
-        <section className={`${rowA} lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]`}>
-          <ChartCard description="Metas e custos contratados lado a lado com o realizado." flush minHeight={220} scroll title="Contratado × realizado">
-            <div className="px-3 pb-2">
-              <ContractTable summary={summary} />
-            </div>
-          </ChartCard>
-          {pace}
-        </section>
-        <section className={`${rowB} lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]`}>
-          {dailyTable}
-          {complementaryCard}
         </section>
       </>
     );

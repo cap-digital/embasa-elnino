@@ -12,7 +12,6 @@ import {
   Menu,
   MessageCircle,
   Monitor,
-  Newspaper,
   Play,
   Search,
   Smartphone,
@@ -38,7 +37,6 @@ const lineIcons: Record<LineId, LucideIcon> = {
   "youtube-shorts": Smartphone,
   "youtube-instream": Play,
   "connected-tv": Tv,
-  "native-taboola": Newspaper,
   spotify: Headphones,
   whatsapp: MessageCircle,
 };

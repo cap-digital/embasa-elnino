@@ -4,7 +4,8 @@ import { requireEnv, todayInBahia } from "./env";
 
 /**
  * Cliente da planilha de mídia (Web App do Google Apps Script).
- * Um GET devolve todas as abas: { success, richMedia: [...], nativeADS: [...], ... }.
+ * Um GET devolve todas as abas: { success, richMedia: [...], whatsapp: [...], ... }.
+ * A aba `nativeADS` (Taboola, removido do plano) é ignorada.
  * Cada aba é uma lista de linhas por criativo e dia; aqui viram série diária
  * da linha + criativos com o total do período.
  */
@@ -12,7 +13,6 @@ import { requireEnv, todayInBahia } from "./env";
 /** Aba da planilha → linha do painel. */
 export const SHEET_TABS = {
   "rich-media": "richMedia",
-  "native-taboola": "nativeADS",
   "video-hawk": "programaticaHAWK",
   "connected-tv": "connectedTV",
   whatsapp: "whatsapp",
@@ -23,7 +23,6 @@ export type SheetLineId = keyof typeof SHEET_TABS;
 /** Coluna da métrica contratada em cada linha (nomes aceitos, sem acento/caixa). */
 const DELIVERED_COLUMNS: Record<SheetLineId, string[]> = {
   "rich-media": ["impressoes"],
-  "native-taboola": ["cliques", "clicks"],
   "video-hawk": ["visualizacoes", "views", "videoviews", "completes", "visualizacoescompletas"],
   "connected-tv": ["visualizacoes", "views", "videoviews", "completes", "visualizacoescompletas"],
   // Meta de disparos = mensagens entregues com sucesso.

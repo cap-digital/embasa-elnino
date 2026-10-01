@@ -31,13 +31,12 @@ export type LineId =
   | "youtube-shorts"
   | "youtube-instream"
   | "connected-tv"
-  | "native-taboola"
   | "spotify"
   | "whatsapp";
 
 export interface ContractedLine {
   id: LineId;
-  /** Ordem na tabela contratada (1–10). */
+  /** Ordem na tabela contratada (1–9). */
   order: number;
   name: string;
   shortName: string;
