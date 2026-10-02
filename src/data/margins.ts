@@ -17,12 +17,12 @@ export const PLATFORM_MARGINS: Record<
   LineId,
   { label: string; margin: number; spendIncludesMargin?: boolean }
 > = {
-  "video-hawk": { label: "REDE DE VIDEO - HAWK", margin: 0.2720 },
-  spotify: { label: "ESCUTAS/STREAMING (100% VISUALIZ.)", margin: 0.1280 },
-  "connected-tv": { label: "CONNECTED TV - HAWK", margin: 0.2 },
+  "video-hawk": { label: "REDE DE VIDEO - HAWK", margin: 0.28 },
+  spotify: { label: "ESCUTAS/STREAMING (100% VISUALIZ.)", margin: 0.12 },
+  "connected-tv": { label: "CONNECTED TV - HAWK", margin: 0.1360 },
   "rede-display": { label: "REDE DE DISPLAY", margin: 0.1280 },
-  "youtube-shorts": { label: "YT - SHORTS", margin: 0.2 },
-  "youtube-instream": { label: "YT - IN STREAM", margin: 0.1280 },
+  "youtube-shorts": { label: "YT - SHORTS", margin: 0.1520 },
+  "youtube-instream": { label: "YT - IN STREAM", margin: 0.12 },
   "rich-media": { label: "RICH MEDIA", margin: 0.2, spendIncludesMargin: true },
   whatsapp: { label: "WHATSAPP - DISPARO", margin: 0.2, spendIncludesMargin: true },
   "rede-pesquisa": { label: "REDE DE PESQUISA", margin: 0.2 },
