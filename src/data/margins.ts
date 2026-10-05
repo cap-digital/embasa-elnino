@@ -17,7 +17,7 @@ export const PLATFORM_MARGINS: Record<
   LineId,
   { label: string; margin: number; spendIncludesMargin?: boolean }
 > = {
-  "video-hawk": { label: "REDE DE VIDEO - HAWK", margin: 0.28 },
+  "video-hawk": { label: "REDE DE VIDEO - HAWK", margin: 0.275386 },
   spotify: { label: "ESCUTAS/STREAMING (100% VISUALIZ.)", margin: 0.12 },
   "connected-tv": { label: "CONNECTED TV - HAWK", margin: 0.1360 },
   "rede-display": { label: "REDE DE DISPLAY", margin: 0.127986 },
