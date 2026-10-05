@@ -2,11 +2,60 @@
 
 import { Flag, Gauge, Hourglass, Rabbit, Turtle } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
+import { useLayoutEffect, useRef } from "react";
 import type { LineSummary } from "@/data/types";
 import { formatCompact, formatPercent } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
 const DAY_MS = 86_400_000;
+const LABEL_GAP = 6;
+/** Largura do ícone da bandeira (size-5). */
+const FLAG_WIDTH = 20;
+/** Quanto os rótulos podem invadir a margem lateral da pista (mx-6). */
+const LABEL_OVERFLOW = 24;
+
+type TrackLabel = { id: string; center: number; width: number; fixed?: boolean };
+
+/**
+ * Distribui rótulos numa mesma faixa sem sobreposição: os que colidem viram um
+ * grupo lado a lado, centrado na média dos marcadores (ou ancorado no item fixo).
+ * Retorna o deslocamento horizontal (px) de cada rótulo em relação ao seu marcador.
+ */
+function resolveLabels(items: TrackLabel[], min: number, max: number): Record<string, number> {
+  const sorted = [...items].sort((a, b) => a.center - b.center || Number(!!a.fixed) - Number(!!b.fixed));
+  const span = (g: TrackLabel[]) => g.reduce((s, it) => s + it.width, 0) + LABEL_GAP * (g.length - 1);
+  const place = (g: TrackLabel[]) => {
+    const fixedIdx = g.findIndex((it) => it.fixed);
+    const left =
+      fixedIdx >= 0
+        ? g[fixedIdx].center - g[fixedIdx].width / 2 - g.slice(0, fixedIdx).reduce((s, it) => s + it.width + LABEL_GAP, 0)
+        : g.reduce((s, it) => s + it.center, 0) / g.length - span(g) / 2;
+    return Math.min(Math.max(left, min), max - span(g));
+  };
+
+  const groups = sorted.map((it) => ({ items: [it], left: place([it]) }));
+  for (let i = 1; i < groups.length; ) {
+    const prev = groups[i - 1];
+    const cur = groups[i];
+    if (prev.left + span(prev.items) + LABEL_GAP > cur.left) {
+      const items = [...prev.items, ...cur.items];
+      groups.splice(i - 1, 2, { items, left: place(items) });
+      i = Math.max(i - 1, 1);
+    } else {
+      i++;
+    }
+  }
+
+  const out: Record<string, number> = {};
+  for (const g of groups) {
+    let x = g.left;
+    for (const it of g.items) {
+      out[it.id] = x + it.width / 2 - it.center;
+      x += it.width + LABEL_GAP;
+    }
+  }
+  return out;
+}
 
 /**
  * "Corrida até a meta": a plataforma corre numa pista até a bandeira (100%).
@@ -39,13 +88,50 @@ export function GoalRace({ summary }: { summary: LineSummary }) {
   const scaleMax = Math.max(1, projected ?? 0, actual) * 1.04;
   const x = (v: number) => `${(Math.min(v, scaleMax) / scaleMax) * 100}%`;
   const verdictGood = projected !== null && projected >= 1;
+  // Com a veiculação encerrada a projeção coincide com o atual: não repete o marcador.
+  const showProjection = projected !== null && Math.round(projected * 100) !== Math.round(actual * 100);
+
+  const trackRef = useRef<HTMLDivElement>(null);
+  const expectedLabelRef = useRef<HTMLSpanElement>(null);
+  const metaLabelRef = useRef<HTMLSpanElement>(null);
+  const actualLabelRef = useRef<HTMLSpanElement>(null);
+  const projectedLabelRef = useRef<HTMLSpanElement>(null);
+
+  // Afasta os rótulos que se sobreporiam (posições finais, já com a pista medida).
+  useLayoutEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const refs = { expected: expectedLabelRef, meta: metaLabelRef, actual: actualLabelRef, projected: projectedLabelRef };
+    const run = () => {
+      const width = track.clientWidth;
+      const px = (v: number) => (Math.min(v, scaleMax) / scaleMax) * width;
+      const label = (id: keyof typeof refs, v: number): TrackLabel[] => {
+        const el = refs[id].current;
+        return el ? [{ id, center: px(v), width: el.offsetWidth }] : [];
+      };
+      const min = -LABEL_OVERFLOW;
+      const max = width + LABEL_OVERFLOW;
+      const shifts = {
+        ...resolveLabels([...label("expected", expected), { id: "flag", center: px(1), width: FLAG_WIDTH, fixed: true }], min, max),
+        ...resolveLabels([...label("meta", 1), ...label("actual", actual), ...label("projected", projected ?? 0)], min, max),
+      };
+      for (const [id, ref] of Object.entries(refs)) {
+        if (ref.current) ref.current.style.translate = `${shifts[id] ?? 0}px 0`;
+      }
+    };
+    run();
+    const observer = new ResizeObserver(run);
+    observer.observe(track);
+    for (const ref of Object.values(refs)) if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [actual, expected, projected, scaleMax, showProjection]);
 
   const transition = reduced ? { duration: 0 } : { duration: 1.4, ease: [0.22, 1, 0.36, 1] as const };
 
   return (
     <div className="relative flex flex-col gap-5">
       {/* Pista */}
-      <div className="relative mx-6 pt-9 pb-7">
+      <div className="relative mx-6 pt-9 pb-7" ref={trackRef}>
         {/* trilha */}
         <div className="relative h-3 rounded-full bg-[repeating-linear-gradient(90deg,var(--muted)_0_14px,color-mix(in_oklab,var(--muted)_40%,var(--card))_14px_28px)]">
           {/* rastro percorrido */}
@@ -72,13 +158,17 @@ export function GoalRace({ summary }: { summary: LineSummary }) {
         <div className="absolute top-0 bottom-0 flex flex-col items-center" style={{ left: x(1), transform: "translateX(-50%)" }}>
           <Flag aria-hidden className="size-5 text-foreground" />
           <span className="w-0.5 flex-1 bg-[repeating-linear-gradient(180deg,var(--foreground)_0_4px,transparent_4px_8px)]" />
-          <span className="text-[10px] font-semibold uppercase tracking-[0.14em]">meta</span>
+          <span className="whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.14em]" ref={metaLabelRef}>
+            meta
+          </span>
         </div>
 
         {/* fantasma: onde deveria estar hoje */}
         {expected > 0 ? (
           <div className="absolute top-0 flex flex-col items-center" style={{ left: x(expected), transform: "translateX(-50%)" }}>
-            <span className="mb-1 whitespace-nowrap text-[10px] text-muted-foreground">esperado {formatPercent(expected, 0)}</span>
+            <span className="mb-1 whitespace-nowrap text-[10px] text-muted-foreground" ref={expectedLabelRef}>
+              esperado {formatPercent(expected, 0)}
+            </span>
             <span className="size-5 rounded-full border-2 border-dashed border-muted-foreground/70 bg-card/60" />
           </div>
         ) : null}
@@ -96,13 +186,17 @@ export function GoalRace({ summary }: { summary: LineSummary }) {
             ) : null}
             <span className="relative size-7 rounded-full border-[3px] border-card shadow-md" style={{ backgroundColor: color }} />
           </span>
-          <span className="mt-3.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-bold text-white" style={{ backgroundColor: color }}>
+          <span
+            className="mt-3.5 whitespace-nowrap rounded-full px-2 py-0.5 text-[11px] font-bold text-white"
+            ref={actualLabelRef}
+            style={{ backgroundColor: color }}
+          >
             {formatPercent(actual, 0)}
           </span>
         </motion.div>
 
         {/* ponto projetado */}
-        {projected !== null ? (
+        {showProjection ? (
           <motion.div
             animate={{ opacity: 1 }}
             className="absolute top-6 flex -translate-x-1/2 flex-col items-center"
@@ -111,8 +205,8 @@ export function GoalRace({ summary }: { summary: LineSummary }) {
             transition={{ duration: 0.4, delay: reduced ? 0 : 1.8 }}
           >
             <span className="size-5 rounded-full border-2 border-dotted" style={{ borderColor: color }} />
-            <span className="mt-4 whitespace-nowrap text-[10px] font-semibold" style={{ color }}>
-              projeção {formatPercent(projected, 0)}
+            <span className="mt-4 whitespace-nowrap text-[10px] font-semibold" ref={projectedLabelRef} style={{ color }}>
+              projeção {formatPercent(projected!, 0)}
             </span>
           </motion.div>
         ) : null}
