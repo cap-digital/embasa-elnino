@@ -20,12 +20,12 @@ export const PLATFORM_MARGINS: Record<
   "video-hawk": { label: "REDE DE VIDEO - HAWK", margin: 0.28 },
   spotify: { label: "ESCUTAS/STREAMING (100% VISUALIZ.)", margin: 0.12 },
   "connected-tv": { label: "CONNECTED TV - HAWK", margin: 0.1360 },
-  "rede-display": { label: "REDE DE DISPLAY", margin: 0.1280 },
+  "rede-display": { label: "REDE DE DISPLAY", margin: 0.127986 },
   "youtube-shorts": { label: "YT - SHORTS", margin: 0.1520 },
-  "youtube-instream": { label: "YT - IN STREAM", margin: 0.12 },
+  "youtube-instream": { label: "YT - IN STREAM", margin: 0.119996 },
   "rich-media": { label: "RICH MEDIA", margin: 0.2, spendIncludesMargin: true },
   whatsapp: { label: "WHATSAPP - DISPARO", margin: 0.2, spendIncludesMargin: true },
-  "rede-pesquisa": { label: "REDE DE PESQUISA", margin: 0.2 },
+  "rede-pesquisa": { label: "REDE DE PESQUISA", margin: 0.198659 },
 };
 
 export function marginFor(lineId: LineId): number {
