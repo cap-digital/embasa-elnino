@@ -181,7 +181,7 @@ export function PaceRings({
   const items = [
     { label: `${metric} entregues`, value: metricProgress, color },
     { label: `${metric} esperadas até hoje`, value: expectedProgress, color: "var(--foreground)" },
-    { label: "Investimento (travado)", value: investmentProgress, color: "var(--brand-navy)" },
+    { label: "Investimento", value: investmentProgress, color: "var(--brand-navy)" },
   ];
   const data = items.map((item) => ({ ...item, value: Math.min(item.value, 1) * 100, maxValue: 100 }));
   return (

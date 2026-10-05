@@ -173,9 +173,6 @@ export default async function OverviewPage() {
                 {summary.withoutData} {summary.withoutData === 1 ? "linha ainda sem dados" : "linhas ainda sem dados"}: fora dos totais e do ritmo.
               </p>
             ) : null}
-            <p className="mt-2 text-[11px] text-white/60">
-              Investimento travado em {formatProgress(summary.investmentProgress)}: a barra nunca passa de 100%.
-            </p>
           </div>
         </Reveal>
       </section>

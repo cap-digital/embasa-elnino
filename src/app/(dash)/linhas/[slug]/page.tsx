@@ -219,7 +219,7 @@ function LineBody({ summary, cumulative }: { summary: LineSummary; cumulative: C
       <DailyClicksChart color={color} data={cumulative} />
     </ChartCard>
   ) : (
-    <ChartCard description="Gasto por dia; no tooltip, o acumulado travado no contratado." minHeight={280} title="Evolução diária do investimento">
+    <ChartCard description="Gasto por dia; no tooltip, o acumulado." minHeight={280} title="Evolução diária do investimento">
       <DailySpendChart color={color} data={cumulative} />
     </ChartCard>
   );
@@ -247,7 +247,7 @@ function LineBody({ summary, cumulative }: { summary: LineSummary; cumulative: C
       </ChartCard>
     ) : (
       <ChartCard
-        description={`% da meta de ${strategy.metricLabel}: entregue vs. esperado até hoje; e investimento (travado).`}
+        description={`% da meta de ${strategy.metricLabel}: entregue vs. esperado até hoje; e investimento.`}
         minHeight={260}
         title="Progresso"
       >

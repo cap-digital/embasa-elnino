@@ -32,7 +32,7 @@ export default async function GoalsPage() {
             className="mt-1"
             color="var(--brand-blue)"
             complete={summary.investmentComplete}
-            label={`de ${formatCurrencyInt(summary.totalInvestment)} contratados · travado em 100%`}
+            label={`de ${formatCurrencyInt(summary.totalInvestment)} contratados`}
             progress={summary.investmentProgress}
             size="sm"
             variant="investment"
